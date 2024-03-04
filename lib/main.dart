@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 void main() {
   runApp(const MyApp());
@@ -205,7 +206,16 @@ class HelloScreen extends StatelessWidget {
         title: const Text('Witaj'),
       ),
       body: Center(
-        child: const Text('Hello', style: TextStyle(fontSize: 24)),
+        child: Column(
+          children: [
+            QrImageView(
+              data: 'Pozdrawiam cieplutko',
+              version: QrVersions.auto,
+              size: 200,
+              gapless: true,
+            )
+          ],
+        ),
       ),
     );
   }
