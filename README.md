@@ -17,3 +17,5 @@ Milestone 3
 - Dodanie do aplikacji funkcji mikropłatności
 - Gotowy produkt aplikacji mobilnej na systemy android i ios umożliwiającej rejestrację użytkownika lub logowanie, zakup wejść na skatepark jednorazowych i karnetów na zajęcia.
 - Sprawdzanie ważności wejścia za pomocą aplikacji komputerowej używając czytnika nfc (lub za pomocą skanowania kodów qr)
+- Dokumentacja i raport z projektu
+- Udostępnienie aplikacji na Google Play Store
