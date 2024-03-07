@@ -2,6 +2,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+import 'logowanie.dart';
 import 'main.dart';
 
 class RegistrationScreen extends StatefulWidget {
@@ -152,6 +153,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         .where('login', isEqualTo: _loginController.text)
         .get();
 
+    final QuerySnapshot emailSnapshot = await firestore.collection('guests')
+        .where('email', isEqualTo: _emailController.text)
+        .get();
+
     // Jeśli znaleziono dokumenty, oznacza to, że login już istnieje
     if (loginSnapshot.docs.isNotEmpty) {
 
@@ -159,6 +164,17 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       // Tutaj możesz wyświetlić komunikat o błędzie na interfejsie użytkownika
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Login jest już zajęty')),
+      );
+
+      return;
+    }
+
+    if (emailSnapshot.docs.isNotEmpty) {
+
+      print('Login "${_emailController.text}" już istnieje w bazie danych.');
+      // Tutaj możesz wyświetlić komunikat o błędzie na interfejsie użytkownika
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email jest już zajęty')),
       );
 
       return;
