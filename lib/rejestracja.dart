@@ -1,5 +1,8 @@
 // rejestracja.dart
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+
+import 'main.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({Key? key}) : super(key: key);
@@ -14,6 +17,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   // Kontrolery do zarządzania wprowadzanym tekstem
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _loginController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
@@ -47,6 +51,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Proszę wpisać nazwisko';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _loginController,
+                decoration: const InputDecoration(labelText: 'Login'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Proszę wpisać poprawny login';
                   }
                   return null;
                 },
@@ -104,6 +118,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
+                    _registerUser();
+
                     // Tutaj możesz dodać logikę rejestracji (np. wysłanie danych do API)
                   }
                 },
@@ -121,10 +137,71 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
+    _loginController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _phoneNumberController.dispose();
     super.dispose();
   }
+  void _registerUser() async {
+    final firestore = FirebaseFirestore.instance;
+
+    // Sprawdzenie, czy login już istnieje
+    final QuerySnapshot loginSnapshot = await firestore.collection('guests')
+        .where('login', isEqualTo: _loginController.text)
+        .get();
+
+    // Jeśli znaleziono dokumenty, oznacza to, że login już istnieje
+    if (loginSnapshot.docs.isNotEmpty) {
+
+      print('Login "${_loginController.text}" już istnieje w bazie danych.');
+      // Tutaj możesz wyświetlić komunikat o błędzie na interfejsie użytkownika
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Login jest już zajęty')),
+      );
+
+      return;
+    }
+
+    // Jeśli login nie istnieje, kontynuujemy rejestrację
+    int guestNumber = 1; // Startujemy od numeru 1
+
+    // Sprawdzenie istniejących elementów
+    QuerySnapshot snapshot = await firestore.collection('guests').get();
+    final List<DocumentSnapshot> documents = snapshot.docs;
+
+    // Szukamy najwyższego numeru gościa
+    for (var document in documents) {
+      String guestId = document.id; // 'gosc1', 'gosc2' itd.
+      int currentNumber = int.parse(guestId.replaceAll('gosc', '')); // Konwersja 'goscX' do X
+      if (currentNumber >= guestNumber) {
+        guestNumber = currentNumber + 1; // Ustawiamy numer na następny wolny
+      }
+    }
+
+    String newGuestId = 'gosc$guestNumber'; // Tworzymy ID dla nowego gościa
+
+    // Dodanie nowego elementu
+    firestore.collection('guests').doc(newGuestId).set({
+      'imie': _firstNameController.text,
+      'nazwisko': _lastNameController.text,
+      'login': _loginController.text,
+      'email': _emailController.text,
+      'haslo': _passwordController.text,  // Pamiętaj o zabezpieczeniach dla haseł!
+      'numer_telefonu': _phoneNumberController.text,
+    }).then((_) {
+      print('Nowy gość $newGuestId zarejestrowany pomyślnie');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+      // Tutaj możesz dodać kod do obsługi pomyślnie zarejestrowanego użytkownika (np. wyświetlenie komunikatu, nawigację itp.)
+    }).catchError((error) {
+      print('Błąd przy rejestracji gościa: $error');
+      // Tutaj możesz dodać kod do obsługi błędów (np. wyświetlenie komunikatu o błędzie)
+    });
+  }
+
 }
+

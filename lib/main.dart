@@ -46,9 +46,44 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Kontrolery do zarządzania wprowadzanym tekstem
     final TextEditingController loginController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
+
+    void login(BuildContext context, String login, String password) async {
+      final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+      try {
+        final QuerySnapshot result = await firestore
+            .collection('guests')
+            .where('login', isEqualTo: login)
+            .limit(1)
+            .get();
+
+        if (result.docs.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Błędne dane logowania')),
+          );
+          return;
+        }
+
+        final Map<String, dynamic> data = result.docs.first.data() as Map<String, dynamic>;
+        if (data['haslo'] == password) {
+          // Zalogowano pomyślnie
+          Navigator.pushReplacement( // Możesz użyć pushReplacement lub push w zależności od potrzeb
+            context,
+            MaterialPageRoute(builder: (context) => HelloScreen(docId: result.docs.first.id)), // Przekazanie docId do HelloScreen
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Błędne dane logowania')),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Wystąpił błąd: $e')),
+        );
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -78,18 +113,11 @@ class LoginScreen extends StatelessWidget {
                   border: OutlineInputBorder(),
                   hintText: 'Wpisz swoje hasło',
                 ),
-                obscureText: true, // Ukrywa wpisywane hasło
+                obscureText: true,
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => HelloScreen(docId: 'gosc2'), // Tutaj przekazujesz docId
-                    ),
-                  );
-                },
+                onPressed: () => login(context, loginController.text, passwordController.text),
                 child: const Text('Zaloguj się'),
               ),
               TextButton(
