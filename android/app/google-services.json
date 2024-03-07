@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "180634287254",
+    "project_id": "mhapp-bbd3f",
+    "storage_bucket": "mhapp-bbd3f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:180634287254:android:d9f6a7269ebcd12aaa56b7",
+        "android_client_info": {
+          "package_name": "com.example.mhapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBoS5z8c_s4ycUDxorZCzXQQMSHQxmHmKU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
