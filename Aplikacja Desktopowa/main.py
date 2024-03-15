@@ -29,7 +29,7 @@ class ImageLabel(FloatLayout):
 
         # Overlay a label on the image
         self.label = Label(text=text,
-                           size_hint=(0.7, 0.4),
+                           size_hint=(0.8, 0.4),
                            halign='center',
                            valign='middle')
         self.label.outline_color = (1, 0, 0, 0.5)
@@ -54,6 +54,7 @@ class CardGrid(GridLayout):
         self.card_timers = {}
         self.init_grid()
         self.nfc_reader = self.connect_reader()
+        self.card_uid = None
 
     def init_grid(self):
         image_path = MyApp.resource_path("roll3.png")
@@ -62,53 +63,29 @@ class CardGrid(GridLayout):
 
     def check_nfc_card(self, dt):
         card_uid = self.read_card(self.nfc_reader)
-        if card_uid:
+        if card_uid and self.card_uid == None:
             # Handle card based on its current state
+            self.card_uid = card_uid
             self.handle_card_state(card_uid)
 
     def handle_card_state(self, card_uid):
-        # Check if the card is in a database
-        """FOR TESTING PURPOSES"""
-        with open('users_database.txt', 'r') as file:
-            lines = file.readlines()
-            for line in lines:
-                if card_uid in line:
-                    # Card found in the database
-                    self.handle_card_found(line.strip().split(":"))
-                    return
-            self.handle_card_not_found(card_uid)
-            return
-
-    def handle_card_found(self, client):
-        """FOR TESTING PURPOSES"""
-        popup = Popup(title='Klient znaleziony!',
+        popup = Popup(title='Udało się odczytać kartę!',
                       content=BoxLayout(orientation='vertical'),
                       size_hint=(None, None), size=(400, 400))
-        if client[3] == "Tak":
-            popup.background_color = (0, 1, 0, 1)
-        else:
-            popup.background_color = (1, 0, 0, 1)
 
-        popup.content.add_widget(Label(text=f"Klient: {client[1]} {client[2]}\nDostęp: {client[3]}"))
+        popup.background_color = (0, 1, 0, 1)
+
+        popup.content.add_widget(Label(text=f"UID: {card_uid}"))
 
         close_button = Button(text='Zamknij', on_press=popup.dismiss, size_hint=(None, None), size=(100, 50),
                               pos_hint={'center_x': 0.5, 'y': 0})
         popup.content.add_widget(close_button)
+        popup.bind(on_dismiss=self.reset_card_uid)
         popup.open()
+        return
 
-    def handle_card_not_found(self, client):
-        """FOR TESTING PURPOSES"""
-        popup = Popup(title='Klient nieznaleziony',
-                        content=BoxLayout(orientation='vertical'),
-                        size_hint=(None, None), size=(400, 400),
-                        background_color = (1, 0, 0, 1))
-
-        popup.content.add_widget(Label(text=f"Brak klienta w bazie danych!"))
-
-        close_button = Button(text='Zamknij', on_press=popup.dismiss, size_hint=(None, None), size=(100, 50),
-                                  pos_hint={'center_x': 0.5, 'y': 0})
-        popup.content.add_widget(close_button)
-        popup.open()
+    def reset_card_uid(self, *args):
+        self.card_uid = None
 
     def connect_reader(self):
         """ Establish a connection with the NFC reader. """
@@ -120,6 +97,7 @@ class CardGrid(GridLayout):
                 return None
             # Assuming the first reader is the one we want to use
             reader = r[0]
+
             # Establish connection
             connection = reader.createConnection()
             connection.connect()
@@ -153,11 +131,6 @@ class CardGrid(GridLayout):
         except Exception as e:
             return None
 
-    def simulate_nfc_scan_from_input(self):
-        """ONLY FOR TESTING PURPOSES: Simulate an NFC card scan using input from the user."""
-        card_uid = input("Wprowadź kod karty NFC: ")
-        self.handle_card_state(card_uid)
-        """####################################################################################################"""
 
 class MyApp(App):
     def build(self):
@@ -167,19 +140,6 @@ class MyApp(App):
 
         grid = CardGrid()
         main_layout.add_widget(grid)
-
-
-        """ONLY FOR TESTING PURPOSES: Add a button to simulate an NFC card scan using input from the user. """
-        simulate_scan_button = Button(
-            text='Symuluj skanowanie karty',
-            size_hint=(1, 0.06),
-            font_size='20sp',  # Adjust font size
-            color="#FFFFFF",  # Text color (white)
-            background_color=[0, 1, 0, 1]  # Green color for simulate scan button
-        )
-        simulate_scan_button.bind(on_press=lambda x: grid.simulate_nfc_scan_from_input())
-        main_layout.add_widget(simulate_scan_button)
-        """####################################################################################################"""
 
         Clock.schedule_interval(grid.check_nfc_card, 0.08)
 
