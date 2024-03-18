@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'main.dart';
+import 'NFC.dart';
+import 'main.dart'; // Załóżmy, że tutaj jest zdefiniowana klasa NfcSendExample
+// Jeśli NfcSendExample jest w innym pliku, zaimportuj ten plik zamiast main.dart
 
 class HelloScreen extends StatelessWidget {
   final String docId; // ID dokumentu do wyświetlenia
@@ -35,6 +37,16 @@ class HelloScreen extends StatelessWidget {
             return const Text("Brak danych");
           },
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => NfcSendExample()),
+          );
+        },
+        child: Icon(Icons.nfc),
+        tooltip: 'Prześlij przez NFC',
       ),
     );
   }
