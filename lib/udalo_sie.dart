@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:mhapp/zmiana_danych.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -10,6 +11,10 @@ import 'NFC.dart';
 import 'logowanie.dart';
 import 'main.dart'; // Załóżmy, że tutaj jest zdefiniowana klasa NfcSendExample
 // Jeśli NfcSendExample jest w innym pliku, zaimportuj ten plik zamiast main.dart
+=======
+
+import 'main.dart';
+>>>>>>> a5f05fc0c1534c8a7b50650709aeb9c677d54c2d
 
 class HelloScreen extends StatelessWidget {
   final String docId; // ID dokumentu do wyświetlenia
@@ -20,6 +25,7 @@ class HelloScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+<<<<<<< HEAD
         leading: PopupMenuButton<int>(
           icon: Icon(Icons.menu), // This creates the hamburger icon
           onSelected: (item) => onSelected(context, item),
@@ -140,6 +146,30 @@ class TicketsPurchaseScreen extends StatelessWidget {
       ),
       body: Center(
         child: Text('Tutaj możesz zakupić wejściówki.'),
+=======
+        title: const Text('Witaj'),
+      ),
+      body: Center(
+        child: FutureBuilder<DocumentSnapshot>(
+          future: DatabaseService().getDocument(docId),
+          builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.hasError) {
+                return Text("Wystąpił błąd: ${snapshot.error}");
+              }
+              if (!snapshot.hasData || !snapshot.data!.exists) {
+                return const Text("Brak danych");
+              }
+              Map<String, dynamic> data = snapshot.data!.data() as Map<String, dynamic>;
+              return Text("Witaj, ${data['imie']} ${data['nazwisko']}!"); // Upewnij się, że klucz 'imie' jest zgodny z Firestore
+            }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator();
+            }
+            return const Text("Brak danych");
+          },
+        ),
+>>>>>>> a5f05fc0c1534c8a7b50650709aeb9c677d54c2d
       ),
     );
   }
