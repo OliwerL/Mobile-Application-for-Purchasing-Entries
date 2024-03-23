@@ -1,91 +1,43 @@
 from kivy.app import App
-from kivy.uix.gridlayout import GridLayout
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
 from kivy.clock import Clock
-from datetime import datetime
-
-from kivy.uix.textinput import TextInput
-from smartcard.System import readers
-from smartcard.util import toHexString
 from kivy.uix.image import Image
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
-import os, sys
+from kivy.uix.boxlayout import BoxLayout
+from kivy.graphics import Color, Rectangle
+import os
+import sys
 from kivy.resources import resource_add_path
 from kivy.core.window import Window
+from smartcard.System import readers
+from smartcard.util import toHexString
+from smartcard.util import toASCIIString
 
-
-class ImageLabel(FloatLayout):
-    def __init__(self, image_path, text, **kwargs):
-        super(ImageLabel, self).__init__(**kwargs)
-
-        # Add an image as background
-        self.image = Image(source=image_path, allow_stretch=True, keep_ratio=False)
-        self.image.size_hint = (1, 1)
-        self.image.pos_hint = {'x': 0, 'y': 0}
-        self.add_widget(self.image)
-
-        # Overlay a label on the image
-        self.label = Label(text=text,
-                           size_hint=(0.8, 0.4),
-                           halign='center',
-                           valign='middle')
-        self.label.outline_color = (1, 0, 0, 0.5)
-        self.label.outline_width = 1
-        self.label.color = (300, 300, 300, 0.9)
-        self.label.pos_hint = {'center_x': 0.5, 'center_y': 0.65}
-        self.add_widget(self.label)
-
-        # Bind size to update font size dynamically
-        self.label.bind(size=self.adjust_font_size)
-
-    def adjust_font_size(self, instance, value):
-        # Adjust font size based on the height of the label
-        instance.font_size = 0.5 * instance.height  # Example scaling factor
-        instance.text_size = instance.size  # Update text size for proper wrapping
-
-
-class CardGrid(GridLayout):
+class CardGrid(FloatLayout):
     def __init__(self, **kwargs):
         super(CardGrid, self).__init__(**kwargs)
-        self.cols = 5
-        self.card_timers = {}
-        self.init_grid()
         self.nfc_reader = self.connect_reader()
         self.card_uid = None
+        self.init_grid()
+        Clock.schedule_interval(self.check_nfc_card, 0.08)
 
     def init_grid(self):
-        image_path = MyApp.resource_path("roll3.png")
-        img_label = ImageLabel(image_path=image_path, text="SKATEPARK")
-        self.add_widget(img_label)
+        # Load the background image
+        background_image = Image(source="tlo.jpg", allow_stretch=True, keep_ratio=False)
+        self.add_widget(background_image)
 
-    def check_nfc_card(self, dt):
-        card_uid = self.read_card(self.nfc_reader)
-        if card_uid and self.card_uid == None:
-            # Handle card based on its current state
-            self.card_uid = card_uid
-            self.handle_card_state(card_uid)
+        # Create the label for "NFC WEJŚCIÓWKI" text with a white color
+        img_label_white = Label(text="NFC WEJŚCIÓWKI", size_hint=(None, None), size=(600, 200), pos_hint={'center_x': 0.5, 'center_y': 0.5})
+        img_label_white.color = (1, 1, 1, 1)  # Set text color to white
+        img_label_white.font_size = 50
+        self.add_widget(img_label_white)
 
-    def handle_card_state(self, card_uid):
-        popup = Popup(title='Udało się odczytać kartę!',
-                      content=BoxLayout(orientation='vertical'),
-                      size_hint=(None, None), size=(400, 400))
-
-        popup.background_color = (0, 1, 0, 1)
-
-        popup.content.add_widget(Label(text=f"UID: {card_uid}"))
-
-        close_button = Button(text='Zamknij', on_press=popup.dismiss, size_hint=(None, None), size=(100, 50),
-                              pos_hint={'center_x': 0.5, 'y': 0})
-        popup.content.add_widget(close_button)
-        popup.bind(on_dismiss=self.reset_card_uid)
-        popup.open()
-        return
-
-    def reset_card_uid(self, *args):
-        self.card_uid = None
+        # Add black rectangle behind the white text label
+        with img_label_white.canvas.before:
+            Color(0, 0, 0, 1)  # Black color
+            self.black_rect = Rectangle(pos=(135, 250), size=(img_label_white.width + 10, img_label_white.height-100))
 
     def connect_reader(self):
         """ Establish a connection with the NFC reader. """
@@ -105,6 +57,40 @@ class CardGrid(GridLayout):
             return connection
         except Exception as e:
             return None
+
+    def check_nfc_card(self, dt):
+        card_uid = self.read_card(self.nfc_reader)
+        if card_uid and self.card_uid is None:
+            # Handle card based on its current state
+            self.card_uid = card_uid
+            self.handle_card_state(card_uid)
+
+    def handle_card_state(self, card_uid):
+        popup = Popup(title='Udało się odczytać kartę!', size_hint=(None, None), size=(400, 400))
+        popup.background_color = (0, 1, 0, 1)
+
+        content_layout = BoxLayout(orientation='vertical')
+        popup.content = content_layout
+
+        # Display UID
+        content_layout.add_widget(Label(text=f"UID: {card_uid}"))
+
+        # Read text data from the card
+        text_data = self.read_text_data(card_uid)
+        if text_data:
+            content_layout.add_widget(Label(text=f"Text on card: {text_data}"))
+        else:
+            content_layout.add_widget(Label(text="Failed to read text data from the card."))
+
+        close_button = Button(text='Zamknij', on_press=popup.dismiss, size_hint=(None, None), size=(100, 50),
+                              pos_hint={'center_x': 0.5, 'y': 0})
+        content_layout.add_widget(close_button)
+
+        popup.bind(on_dismiss=self.reset_card_uid)
+        popup.open()
+
+    def reset_card_uid(self, *args):
+        self.card_uid = None
 
     def read_card(self, connection):
         """ Read data from an NFC card using the provided connection. """
@@ -131,27 +117,44 @@ class CardGrid(GridLayout):
         except Exception as e:
             return None
 
+    def read_text_data(self, card_uid):
+        """ Read text data from an NFC card using the provided UID. """
+        if not self.nfc_reader:
+            return None
+
+        try:
+            # Example command to read NDEF records from an NFC card
+            command = [0xFF, 0xB0, 0x00, 0x04, 0x10]
+
+            # Send command and receive the response
+            data, sw1, sw2 = self.nfc_reader.transmit(command)
+
+            # Check the status words
+            if sw1 == 0x90 and sw2 == 0x00:
+                # Successful response
+                # Assuming the data is UTF-8 encoded text
+                text_data = toASCIIString(data)
+                return text_data
+            else:
+                # Error in response
+                print(f"Failed to read text data from the card: SW1={sw1:02X}, SW2={sw2:02X}")
+                return None
+
+        except Exception as e:
+            print("Error:", e)
+            return None
+
 
 class MyApp(App):
     def build(self):
         Window.size = (900, 600)
 
-        main_layout = BoxLayout(orientation='vertical')
+        main_layout = FloatLayout()
 
         grid = CardGrid()
         main_layout.add_widget(grid)
 
-        Clock.schedule_interval(grid.check_nfc_card, 0.08)
-
         return main_layout
-
-    @staticmethod
-    def resource_path(relative_path):
-        try:
-            base_path = sys._MEIPASS
-        except Exception:
-            base_path = os.path.abspath('.')
-        return os.path.join(base_path, relative_path)
 
 
 if __name__ == '__main__':
