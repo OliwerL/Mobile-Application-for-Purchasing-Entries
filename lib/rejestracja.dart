@@ -2,8 +2,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import 'logowanie.dart';
-import 'main.dart';
+import 'package:mhapp/logowanie.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({Key? key}) : super(key: key);
@@ -146,77 +146,52 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     super.dispose();
   }
   void _registerUser() async {
-    final firestore = FirebaseFirestore.instance;
-
-    // Sprawdzenie, czy login już istnieje
-    final QuerySnapshot loginSnapshot = await firestore.collection('guests')
-        .where('login', isEqualTo: _loginController.text)
-        .get();
-
-    final QuerySnapshot emailSnapshot = await firestore.collection('guests')
-        .where('email', isEqualTo: _emailController.text)
-        .get();
-
-    // Jeśli znaleziono dokumenty, oznacza to, że login już istnieje
-    if (loginSnapshot.docs.isNotEmpty) {
-
-      print('Login "${_loginController.text}" już istnieje w bazie danych.');
-      // Tutaj możesz wyświetlić komunikat o błędzie na interfejsie użytkownika
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login jest już zajęty')),
+    try {
+      // Użyj Firebase Authentication do utworzenia nowego konta użytkownika
+      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passwordController.text,
       );
 
-      return;
-    }
+      // Po pomyślnej rejestracji, zapisz dodatkowe informacje użytkownika w Firestore
+      final firestore = FirebaseFirestore.instance;
+      final String uid = userCredential.user!.uid; // UID nadane przez Firebase Authentication
 
-    if (emailSnapshot.docs.isNotEmpty) {
+      await firestore.collection('users').doc(uid).set({
+        'firstName': _firstNameController.text,
+        'lastName': _lastNameController.text,
+        'login': _loginController.text,  // Opcjonalnie, jeśli chcesz zapisywać login
+        'email': _emailController.text,
+        'phoneNumber': _phoneNumberController.text,  // Opcjonalnie, jeśli chcesz zapisywać numer telefonu
+      });
 
-      print('Login "${_emailController.text}" już istnieje w bazie danych.');
-      // Tutaj możesz wyświetlić komunikat o błędzie na interfejsie użytkownika
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email jest już zajęty')),
-      );
-
-      return;
-    }
-
-    // Jeśli login nie istnieje, kontynuujemy rejestrację
-    int guestNumber = 1; // Startujemy od numeru 1
-
-    // Sprawdzenie istniejących elementów
-    QuerySnapshot snapshot = await firestore.collection('guests').get();
-    final List<DocumentSnapshot> documents = snapshot.docs;
-
-    // Szukamy najwyższego numeru gościa
-    for (var document in documents) {
-      String guestId = document.id; // 'gosc1', 'gosc2' itd.
-      int currentNumber = int.parse(guestId.replaceAll('gosc', '')); // Konwersja 'goscX' do X
-      if (currentNumber >= guestNumber) {
-        guestNumber = currentNumber + 1; // Ustawiamy numer na następny wolny
-      }
-    }
-
-    String newGuestId = 'gosc$guestNumber'; // Tworzymy ID dla nowego gościa
-
-    // Dodanie nowego elementu
-    firestore.collection('guests').doc(newGuestId).set({
-      'imie': _firstNameController.text,
-      'nazwisko': _lastNameController.text,
-      'login': _loginController.text,
-      'email': _emailController.text,
-      'haslo': _passwordController.text,  // Pamiętaj o zabezpieczeniach dla haseł!
-      'numer_telefonu': _phoneNumberController.text,
-    }).then((_) {
-      print('Nowy gość $newGuestId zarejestrowany pomyślnie');
+      // Informacja zwrotna dla użytkownika + nawigacja
+      print('Użytkownik zarejestrowany pomyślnie');
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const LoginScreen()),
       );
-      // Tutaj możesz dodać kod do obsługi pomyślnie zarejestrowanego użytkownika (np. wyświetlenie komunikatu, nawigację itp.)
-    }).catchError((error) {
-      print('Błąd przy rejestracji gościa: $error');
-      // Tutaj możesz dodać kod do obsługi błędów (np. wyświetlenie komunikatu o błędzie)
-    });
+
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = 'Wystąpił błąd podczas rejestracji. Spróbuj ponownie.';
+      if (e.code == 'weak-password') {
+        errorMessage = 'Podane hasło jest zbyt słabe.';
+      } else if (e.code == 'email-already-in-use') {
+        errorMessage = 'Konto dla tego adresu e-mail już istnieje.';
+      } else if (e.code == 'invalid-email') {
+        errorMessage = 'Adres e-mail jest nieprawidłowy.';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
+
+    } catch (e) {
+      print(e); // Dla celów debugowania
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Wystąpił nieoczekiwany błąd. Spróbuj ponownie.')),
+      );
+    }
   }
 
 }
