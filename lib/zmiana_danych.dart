@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AccountSettingsScreen extends StatefulWidget {
-  final String userId; // Identyfikator użytkownika do pobrania danych
+  final String userId;
 
   const AccountSettingsScreen({Key? key, required this.userId}) : super(key: key);
 
@@ -12,13 +13,13 @@ class AccountSettingsScreen extends StatefulWidget {
 
 class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  bool _isLoading = true; // Flag, aby wskazać ładowanie danych
+  bool _isLoading = true;
 
-  // Kontrolery do zarządzania wprowadzanym tekstem
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController(); // Nowy kontroler dla nowego hasła
 
   @override
   void initState() {
@@ -31,20 +32,15 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
       DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(widget.userId).get();
       Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
 
-      _firstNameController.text = userData['imie'] ?? '';
-      _lastNameController.text = userData['nazwisko'] ?? '';
+      _firstNameController.text = userData['firstName'] ?? '';
+      _lastNameController.text = userData['lastName'] ?? '';
       _emailController.text = userData['email'] ?? '';
-      _phoneNumberController.text = userData['numer_telefonu'] ?? '';
+      _phoneNumberController.text = userData['phoneNumber'] ?? '';
 
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     } catch (e) {
-      // Obsługa błędów, np. pokazanie komunikatu
       print('Błąd przy ładowaniu danych użytkownika: $e');
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
   }
 
@@ -62,7 +58,6 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
           key: _formKey,
           child: Column(
             children: [
-              // Pola formularza z wstępnie wypełnionymi danymi
               TextFormField(
                 controller: _firstNameController,
                 decoration: const InputDecoration(labelText: 'Imię'),
@@ -80,6 +75,11 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                 decoration: const InputDecoration(labelText: 'Numer telefonu'),
                 keyboardType: TextInputType.phone,
               ),
+              TextFormField(
+                controller: _newPasswordController,
+                decoration: const InputDecoration(labelText: 'Nowe Hasło'),
+                obscureText: true, // Ukrywa wprowadzane hasło
+              ),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _updateUserSettings,
@@ -92,30 +92,39 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     );
   }
 
-  void _updateUserSettings() {
-    // Logika aktualizacji wybranych danych użytkownika
+  void _updateUserSettings() async {
+    // Aktualizacja danych użytkownika w Firestore
     FirebaseFirestore.instance.collection('users').doc(widget.userId).update({
-      'imie': _firstNameController.text,
-      'nazwisko': _lastNameController.text,
+      'firstName': _firstNameController.text,
+      'lastName': _lastNameController.text,
       'email': _emailController.text,
-      'numer_telefonu': _phoneNumberController.text,
-    }).then((_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Dane zaktualizowane pomyślnie')),
-      );
-    }).catchError((error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Wystąpił błąd przy aktualizacji danych')),
-      );
-    });
+      'phoneNumber': _phoneNumberController.text,
+    }).then((_) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Dane zaktualizowane pomyślnie'))))
+        .catchError((error) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Wystąpił błąd przy aktualizacji danych'))));
+
+    // Aktualizacja hasła, jeśli pole nowego hasła nie jest puste
+    if (_newPasswordController.text.isNotEmpty) {
+      User? user = FirebaseAuth.instance.currentUser;
+      user?.updatePassword(_newPasswordController.text).then((_) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Hasło zaktualizowane pomyślnie')));
+      }).catchError((error) {
+        // Obsługa potencjalnych błędów przy aktualizacji hasła
+        print('Wystąpił błąd przy aktualizacji hasła: $error');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Wystąpił błąd przy aktualizacji hasła. Może być konieczne ponowne zalogowanie się.')),
+        );
+      });
+    }
   }
 
   @override
   void dispose() {
+    // Pamiętaj o zwolnieniu kontrolerów, aby uniknąć wycieków pamięci
     _firstNameController.dispose();
     _lastNameController.dispose();
     _emailController.dispose();
     _phoneNumberController.dispose();
+    _newPasswordController.dispose();
     super.dispose();
   }
 }

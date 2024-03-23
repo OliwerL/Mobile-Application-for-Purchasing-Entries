@@ -1,21 +1,18 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mhapp/zmiana_danych.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 
 import 'NFC.dart';
 import 'logowanie.dart';
-import 'main.dart'; // Załóżmy, że tutaj jest zdefiniowana klasa NfcSendExample
 // Jeśli NfcSendExample jest w innym pliku, zaimportuj ten plik zamiast main.dart
 
 class HelloScreen extends StatelessWidget {
-  final String docId; // ID dokumentu do wyświetlenia
+  final String? docId;
 
-  const HelloScreen({Key? key, required this.docId}) : super(key: key);
+  const HelloScreen({Key? key, this.docId}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

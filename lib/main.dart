@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mhapp/udalo_sie.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'logowanie.dart';
-import 'rejestracja.dart'; // Import nowego pliku
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,7 +27,7 @@ class DatabaseService {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +37,23 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const LoginScreen(),
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.active) {
+            User? user = snapshot.data;
+            if (user == null) {
+              return const LoginScreen(); // Użytkownik nie jest zalogowany, pokazuje ekran logowania
+            }
+            return const HelloScreen(); // Użytkownik jest zalogowany, pokazuje inny ekran
+          }
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(), // Ekran ładowania podczas oczekiwania na dane autentykacji
+            ),
+          );
+        },
+      ),
     );
   }
 }
