@@ -42,6 +42,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Proszę wpisać imię';
+                  } else if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) { // Sprawdzenie, czy wartość zawiera tylko litery
+                    return 'Imię może zawierać tylko litery';
                   }
                   return null;
                 },
@@ -52,10 +54,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Proszę wpisać nazwisko';
+                  } else if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) { // Sprawdzenie, czy wartość zawiera tylko litery
+                    return 'Nazwisko może zawierać tylko litery';
                   }
                   return null;
                 },
               ),
+
               TextFormField(
                 controller: _loginController,
                 decoration: const InputDecoration(labelText: 'Login'),
@@ -156,16 +161,27 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         User? user = userCredential.user;
         if (user != null && !user.emailVerified) {
           await user.sendEmailVerification();
+
+          // Zapisywanie dodatkowych informacji użytkownika w Firestore
+          await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+            'firstName': _firstNameController.text,
+            'lastName': _lastNameController.text,
+            'email': _emailController.text,
+            'login': _loginController.text,
+            'phoneNumber': _phoneNumberController.text,
+          });
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Wysłaliśmy link weryfikacyjny na Twój adres e-mail. Sprawdź swoją skrzynkę odbiorczą i postępuj zgodnie z instrukcjami, aby zweryfikować konto.')),
           );
 
-          // Przekierowanie do ekranu logowania po wysłaniu e-maila weryfikacyjnego
+          // Przekierowanie do ekranu logowania po wysłaniu e-maila weryfikacyjnego i zapisaniu danych
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const LoginScreen()),
           );
         }
+
       } on FirebaseAuthException catch (e) {
         String errorMessage = 'Wystąpił błąd podczas rejestracji. Spróbuj ponownie.';
         if (e.code == 'weak-password') {

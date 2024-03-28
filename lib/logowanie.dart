@@ -1,7 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mhapp/rejestracja.dart';
 import 'package:mhapp/udalo_sie.dart';
+import 'package:mhapp/weryfikacja_mail.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -14,7 +14,6 @@ class LoginScreen extends StatelessWidget {
 
     void loginUser(BuildContext context, String email, String password) async {
       try {
-        // Użyj Firebase Authentication do logowania
         UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: email,
           password: password,
@@ -23,16 +22,20 @@ class LoginScreen extends StatelessWidget {
         User? user = userCredential.user;
 
         if (user != null) {
-          if (!user.emailVerified) {
-            // E-mail nie został zweryfikowany, wyświetl odpowiedni komunikat
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Proszę zweryfikować swój adres e-mail.')),
-            );
-          } else {
-            // Jeśli logowanie się powiodło i e-mail jest zweryfikowany, przenieś użytkownika do kolejnego ekranu
+          await user.reload(); // Odśwież informacje o użytkowniku, aby upewnić się, że mamy najnowsze dane
+          user = FirebaseAuth.instance.currentUser; // Ponownie pobierz informacje o aktualnym użytkowniku
+
+          if (user?.emailVerified != true) {
+            // Jeśli e-mail nie został zweryfikowany, przenieś użytkownika na ekran informujący o konieczności weryfikacji
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => HelloScreen(docId: user.uid)), // Bezpieczne użycie user!.uid po sprawdzeniu, że user nie jest null
+              MaterialPageRoute(builder: (context) => EmailVerificationScreen()),
+            );
+          } else {
+            // Jeśli e-mail został zweryfikowany, przenieś użytkownika do kolejnego ekranu
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HelloScreen(docId: user?.uid ?? '')),
             );
           }
         }
@@ -54,6 +57,7 @@ class LoginScreen extends StatelessWidget {
         );
       }
     }
+
 
     return Scaffold(
       appBar: AppBar(

@@ -17,7 +17,6 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
 
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _newPasswordController2 = TextEditingController();
@@ -35,7 +34,6 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
 
       _firstNameController.text = userData['firstName'] ?? '';
       _lastNameController.text = userData['lastName'] ?? '';
-      _emailController.text = userData['email'] ?? '';
       _phoneNumberController.text = userData['phoneNumber'] ?? '';
 
       setState(() => _isLoading = false);
@@ -79,18 +77,6 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                     return 'Proszę wpisać nazwisko';
                   } else if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
                     return 'Nazwisko może zawierać tylko litery';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: 'E-mail'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Proszę wpisać adres e-mail';
-                  } else if (!value.contains('@')) {
-                    return 'Proszę wpisać poprawny adres e-mail';
                   }
                   return null;
                 },
@@ -141,44 +127,68 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
   }
 
   void _updateUserSettings() async {
-    // Sprawdź, czy formularz jest poprawnie zwalidowany
-    if (_formKey.currentState!.validate()) {
-      // Aktualizacja danych użytkownika w Firestore
-      FirebaseFirestore.instance.collection('users').doc(widget.userId).update({
-        'firstName': _firstNameController.text,
-        'lastName': _lastNameController.text,
-        'email': _emailController.text,
-        'phoneNumber': _phoneNumberController.text,
-      }).then((_) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Dane zaktualizowane pomyślnie'))))
-          .catchError((error) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Wystąpił błąd przy aktualizacji danych'))));
+    Map<String, dynamic> updates = {};
 
-      // Aktualizacja hasła, jeśli pole nowego hasła nie jest puste
-      if (_newPasswordController.text.isNotEmpty) {
-        User? user = FirebaseAuth.instance.currentUser;
-        user?.updatePassword(_newPasswordController.text).then((_) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Hasło zaktualizowane pomyślnie')));
-        }).catchError((error) {
-          // Obsługa potencjalnych błędów przy aktualizacji hasła
-          print('Wystąpił błąd przy aktualizacji hasła: $error');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Wystąpił błąd przy aktualizacji hasła. Może być konieczne ponowne zalogowanie się.')),
-          );
-        });
-      }
-      if (_newPasswordController2.text.isNotEmpty) {
-        User? user = FirebaseAuth.instance.currentUser;
-        user?.updatePassword(_newPasswordController2.text).then((_) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Hasło zaktualizowane pomyślnie')));
-        }).catchError((error) {
-          // Obsługa potencjalnych błędów przy aktualizacji hasła
-          print('Wystąpił błąd przy aktualizacji hasła: $error');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Wystąpił błąd przy aktualizacji hasła. Może być konieczne ponowne zalogowanie się.')),
-          );
-        });
+    // Walidacja i aktualizacja imienia, jeśli zostało zmienione
+    if (_firstNameController.text.isNotEmpty) {
+      if (!RegExp(r'^[a-zA-Z]+$').hasMatch(_firstNameController.text)) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Imię może zawierać tylko litery')));
+        return; // Przerwanie funkcji, jeśli walidacja się nie powiedzie
+      } else {
+        updates['firstName'] = _firstNameController.text;
       }
     }
+
+    // Walidacja i aktualizacja nazwiska, jeśli zostało zmienione
+    if (_lastNameController.text.isNotEmpty) {
+      if (!RegExp(r'^[a-zA-Z]+$').hasMatch(_lastNameController.text)) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Nazwisko może zawierać tylko litery')));
+        return;
+      } else {
+        updates['lastName'] = _lastNameController.text;
+      }
+    }
+
+    // Walidacja i aktualizacja numeru telefonu, jeśli został zmieniony
+    if (_phoneNumberController.text.isNotEmpty) {
+      if (_phoneNumberController.text.length != 9 || !RegExp(r'^[0-9]+$').hasMatch(_phoneNumberController.text)) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Numer telefonu musi składać się z 9 cyfr')));
+        return;
+      } else {
+        updates['phoneNumber'] = _phoneNumberController.text;
+      }
+    }
+
+    // Aktualizacja danych użytkownika w Firestore, jeśli jest coś do zaktualizowania
+    if (updates.isNotEmpty) {
+      await FirebaseFirestore.instance.collection('users').doc(widget.userId).update(updates).then((_) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Dane zaktualizowane pomyślnie')));
+      }).catchError((error) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Wystąpił błąd przy aktualizacji danych')));
+      });
+    }
+
+    // Aktualizacja hasła, jeśli pola haseł są wypełnione i hasła są takie same
+    if (_newPasswordController.text.isNotEmpty && _newPasswordController2.text == _newPasswordController.text) {
+      if (_newPasswordController.text.length < 6) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Hasło musi mieć co najmniej 6 znaków')));
+        return;
+      }
+
+      User? user = FirebaseAuth.instance.currentUser;
+      await user?.updatePassword(_newPasswordController.text).then((_) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Hasło zaktualizowane pomyślnie')));
+      }).catchError((error) {
+        print('Wystąpił błąd przy aktualizacji hasła: $error');
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Wystąpił błąd przy aktualizacji hasła. Może być konieczne ponowne zalogowanie się.')));
+      });
+    } else if (_newPasswordController.text.isNotEmpty || _newPasswordController2.text.isNotEmpty) {
+      // Jeśli jedno z pól haseł jest wypełnione, ale hasła nie są takie same lub drugie pole jest puste
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Hasła nie pasują do siebie')));
+    }
   }
+
+
 
 
   @override
@@ -186,7 +196,6 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     // Pamiętaj o zwolnieniu kontrolerów, aby uniknąć wycieków pamięci
     _firstNameController.dispose();
     _lastNameController.dispose();
-    _emailController.dispose();
     _phoneNumberController.dispose();
     _newPasswordController.dispose();
     super.dispose();
