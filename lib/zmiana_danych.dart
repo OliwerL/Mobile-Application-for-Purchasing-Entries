@@ -14,6 +14,10 @@ class AccountSettingsScreen extends StatefulWidget {
 class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isLoading = true;
+  String? _firstNameError;
+  String? _lastNameError;
+  String? _phoneNumberError;
+  String? _passwordError;
 
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
@@ -59,9 +63,12 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
             children: [
               TextFormField(
                 controller: _firstNameController,
-                decoration: const InputDecoration(labelText: 'Imię'),
+                decoration: InputDecoration(
+                  labelText: 'Imię',
+                  errorText: _firstNameError, // Używamy zmiennej _firstNameError do wyświetlenia błędu
+                ),
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
+                  if (value!.isEmpty) {
                     return 'Proszę wpisać imię';
                   } else if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
                     return 'Imię może zawierać tylko litery';
@@ -69,11 +76,15 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                   return null;
                 },
               ),
+
               TextFormField(
                 controller: _lastNameController,
-                decoration: const InputDecoration(labelText: 'Nazwisko'),
+                decoration: InputDecoration(
+                  labelText: 'Nazwisko',
+                  errorText: _lastNameError, // Używamy zmiennej _lastNameError do wyświetlenia błędu
+                ),
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
+                  if (value!.isEmpty) {
                     return 'Proszę wpisać nazwisko';
                   } else if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
                     return 'Nazwisko może zawierać tylko litery';
@@ -81,39 +92,39 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                   return null;
                 },
               ),
+
               TextFormField(
                 controller: _phoneNumberController,
-                decoration: const InputDecoration(labelText: 'Numer telefonu'),
+                decoration: InputDecoration(
+                  labelText: 'Numer telefonu',
+                  errorText: _phoneNumberError,  // Wyświetlanie komunikatu o błędzie
+                ),
                 keyboardType: TextInputType.phone,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Proszę wpisać numer telefonu';
-                  } else if (value.length != 9 || !RegExp(r'^[0-9]+$').hasMatch(value)) {
-                    return 'Numer telefonu musi składać się z 9 cyfr';
-                  }
-                  return null;
-                },
               ),
               TextFormField(
                 controller: _newPasswordController,
-                decoration: const InputDecoration(labelText: 'Nowe Hasło'),
+                decoration: InputDecoration(
+                  labelText: 'Nowe Hasło',
+                  errorText: _passwordError, // Używamy zmiennej _passwordError do wyświetlenia błędu
+                ),
                 obscureText: true, // Ukrywa wprowadzane hasło
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Proszę wpisać nowe hasło';
-                  } else if (value.length < 6) {
+                  if (value!.isNotEmpty && value.length < 6) {
                     return 'Hasło musi mieć co najmniej 6 znaków';
-                  } else if (_newPasswordController2.text != value) {
-                    return 'Hasła nie pasują do siebie';
                   }
                   return null;
                 },
               ),
+
               TextFormField(
                 controller: _newPasswordController2,
-                decoration: const InputDecoration(labelText: 'Powtórz Hasło'),
+                decoration: InputDecoration(
+                  labelText: 'Powtórz Hasło',
+                  errorText: _passwordError, // Ponownie używamy zmiennej _passwordError do wyświetlenia błędu
+                ),
                 obscureText: true, // Ukrywa wprowadzane hasło
               ),
+
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _updateUserSettings,
@@ -127,77 +138,89 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
   }
 
   void _updateUserSettings() async {
+    bool dataUpdated = false;
+    bool passwordUpdated = false;
+
+    setState(() {
+      _firstNameError = null;
+      _lastNameError = null;
+      _phoneNumberError = null;
+      _passwordError = null;
+    });
+
     Map<String, dynamic> updates = {};
 
-    // Walidacja i aktualizacja imienia, jeśli zostało zmienione
+    // Walidacja i aktualizacja imienia
     if (_firstNameController.text.isNotEmpty) {
-      if (!RegExp(r'^[a-zA-Z]+$').hasMatch(_firstNameController.text)) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Imię może zawierać tylko litery')));
-        return; // Przerwanie funkcji, jeśli walidacja się nie powiedzie
-      } else {
-        updates['firstName'] = _firstNameController.text;
-      }
+      updates['firstName'] = _firstNameController.text;
     }
 
-    // Walidacja i aktualizacja nazwiska, jeśli zostało zmienione
+    // Walidacja i aktualizacja nazwiska
     if (_lastNameController.text.isNotEmpty) {
-      if (!RegExp(r'^[a-zA-Z]+$').hasMatch(_lastNameController.text)) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Nazwisko może zawierać tylko litery')));
-        return;
-      } else {
-        updates['lastName'] = _lastNameController.text;
-      }
+      updates['lastName'] = _lastNameController.text;
     }
 
-    // Walidacja i aktualizacja numeru telefonu, jeśli został zmieniony
+    // Walidacja i aktualizacja numeru telefonu
     if (_phoneNumberController.text.isNotEmpty) {
-      if (_phoneNumberController.text.length != 9 || !RegExp(r'^[0-9]+$').hasMatch(_phoneNumberController.text)) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Numer telefonu musi składać się z 9 cyfr')));
-        return;
-      } else {
+      if (_phoneNumberController.text.length == 9 && RegExp(r'^[0-9]+$').hasMatch(_phoneNumberController.text)) {
         updates['phoneNumber'] = _phoneNumberController.text;
+      } else {
+        setState(() {
+          _phoneNumberError = 'Numer telefonu musi składać się z 9 cyfr';
+        });
+        return;
       }
     }
 
-    // Aktualizacja danych użytkownika w Firestore, jeśli jest coś do zaktualizowania
+    // Aktualizacja danych użytkownika w Firestore
     if (updates.isNotEmpty) {
       await FirebaseFirestore.instance.collection('users').doc(widget.userId).update(updates).then((_) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Dane zaktualizowane pomyślnie')));
+        dataUpdated = true;
       }).catchError((error) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Wystąpił błąd przy aktualizacji danych')));
       });
     }
 
-    // Aktualizacja hasła, jeśli pola haseł są wypełnione i hasła są takie same
-    if (_newPasswordController.text.isNotEmpty && _newPasswordController2.text == _newPasswordController.text) {
-      if (_newPasswordController.text.length < 6) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Hasło musi mieć co najmniej 6 znaków')));
+    // Walidacja i zmiana hasła
+    if (_newPasswordController.text.isNotEmpty && _newPasswordController2.text.isNotEmpty) {
+      if (_newPasswordController.text == _newPasswordController2.text && _newPasswordController.text.length >= 6) {
+        User? user = FirebaseAuth.instance.currentUser;
+        await user?.updatePassword(_newPasswordController.text).then((_) {
+          passwordUpdated = true;
+        }).catchError((error) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Wystąpił błąd przy aktualizacji hasła')));
+        });
+      } else {
+        setState(() {
+          _passwordError = 'Hasła nie pasują do siebie lub są za krótkie';
+        });
         return;
       }
+    }
 
-      User? user = FirebaseAuth.instance.currentUser;
-      await user?.updatePassword(_newPasswordController.text).then((_) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Hasło zaktualizowane pomyślnie')));
-      }).catchError((error) {
-        print('Wystąpił błąd przy aktualizacji hasła: $error');
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Wystąpił błąd przy aktualizacji hasła. Może być konieczne ponowne zalogowanie się.')));
-      });
-    } else if (_newPasswordController.text.isNotEmpty || _newPasswordController2.text.isNotEmpty) {
-      // Jeśli jedno z pól haseł jest wypełnione, ale hasła nie są takie same lub drugie pole jest puste
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Hasła nie pasują do siebie')));
+    // Wyświetlenie odpowiednich komunikatów
+    if (dataUpdated && passwordUpdated) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Dane i hasło zostały zaktualizowane')));
+    } else if (dataUpdated) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Dane zostały zaktualizowane')));
+    } else if (passwordUpdated) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Hasło zostało zaktualizowane')));
     }
   }
 
-
-
-
-  @override
-  void dispose() {
-    // Pamiętaj o zwolnieniu kontrolerów, aby uniknąć wycieków pamięci
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _phoneNumberController.dispose();
-    _newPasswordController.dispose();
-    super.dispose();
   }
-}
+
+
+
+
+  // @override
+  // void dispose() {
+  //   // Pamiętaj o zwolnieniu kontrolerów, aby uniknąć wycieków pamięci
+  //   _firstNameController.dispose();
+  //   _lastNameController.dispose();
+  //   _phoneNumberController.dispose();
+  //   _newPasswordController.dispose();
+  //   super.dispose();
+  // }
+
+
