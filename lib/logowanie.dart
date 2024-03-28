@@ -14,35 +14,47 @@ class LoginScreen extends StatelessWidget {
 
     void loginUser(BuildContext context, String email, String password) async {
       try {
-      // Użyj Firebase Authentication do logowania
+        // Użyj Firebase Authentication do logowania
         UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
+          email: email,
+          password: password,
         );
 
-        // Jeśli logowanie się powiodło, możesz przenieść użytkownika do kolejnego ekranu
-        Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HelloScreen(docId: userCredential.user!.uid)),
-        );
-        } on FirebaseAuthException catch (e) {
+        User? user = userCredential.user;
+
+        if (user != null) {
+          if (!user.emailVerified) {
+            // E-mail nie został zweryfikowany, wyświetl odpowiedni komunikat
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Proszę zweryfikować swój adres e-mail.')),
+            );
+          } else {
+            // Jeśli logowanie się powiodło i e-mail jest zweryfikowany, przenieś użytkownika do kolejnego ekranu
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HelloScreen(docId: user.uid)), // Bezpieczne użycie user!.uid po sprawdzeniu, że user nie jest null
+            );
+          }
+        }
+      } on FirebaseAuthException catch (e) {
         String message = 'Wystąpił błąd podczas logowania.';
         if (e.code == 'user-not-found') {
-        message = 'Nie znaleziono użytkownika.';
+          message = 'Nie znaleziono użytkownika.';
         } else if (e.code == 'wrong-password') {
-        message = 'Błędne hasło.';
+          message = 'Błędne hasło.';
         }
         ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
+          SnackBar(content: Text(message)),
         );
       } catch (e) {
         // Inny rodzaj błędu, na przykład brak połączenia z internetem
         print(e); // Dobrą praktyką jest zalogowanie błędu
         ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Wystąpił nieoczekiwany błąd.')),
+          SnackBar(content: Text('Wystąpił nieoczekiwany błąd.')),
         );
       }
     }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Logowanie'),

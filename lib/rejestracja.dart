@@ -146,53 +146,49 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     super.dispose();
   }
   void _registerUser() async {
-    try {
-      // Użyj Firebase Authentication do utworzenia nowego konta użytkownika
-      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _emailController.text,
-        password: _passwordController.text,
-      );
+    if (_formKey.currentState!.validate()) {
+      try {
+        UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
 
-      // Po pomyślnej rejestracji, zapisz dodatkowe informacje użytkownika w Firestore
-      final firestore = FirebaseFirestore.instance;
-      final String uid = userCredential.user!.uid; // UID nadane przez Firebase Authentication
+        User? user = userCredential.user;
+        if (user != null && !user.emailVerified) {
+          await user.sendEmailVerification();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Wysłaliśmy link weryfikacyjny na Twój adres e-mail. Sprawdź swoją skrzynkę odbiorczą i postępuj zgodnie z instrukcjami, aby zweryfikować konto.')),
+          );
 
-      await firestore.collection('users').doc(uid).set({
-        'firstName': _firstNameController.text,
-        'lastName': _lastNameController.text,
-        'login': _loginController.text,  // Opcjonalnie, jeśli chcesz zapisywać login
-        'email': _emailController.text,
-        'phoneNumber': _phoneNumberController.text,  // Opcjonalnie, jeśli chcesz zapisywać numer telefonu
-      });
-
-      // Informacja zwrotna dla użytkownika + nawigacja
-      print('Użytkownik zarejestrowany pomyślnie');
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
-
-    } on FirebaseAuthException catch (e) {
-      String errorMessage = 'Wystąpił błąd podczas rejestracji. Spróbuj ponownie.';
-      if (e.code == 'weak-password') {
-        errorMessage = 'Podane hasło jest zbyt słabe.';
-      } else if (e.code == 'email-already-in-use') {
-        errorMessage = 'Konto dla tego adresu e-mail już istnieje.';
-      } else if (e.code == 'invalid-email') {
-        errorMessage = 'Adres e-mail jest nieprawidłowy.';
+          // Przekierowanie do ekranu logowania po wysłaniu e-maila weryfikacyjnego
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+          );
+        }
+      } on FirebaseAuthException catch (e) {
+        String errorMessage = 'Wystąpił błąd podczas rejestracji. Spróbuj ponownie.';
+        if (e.code == 'weak-password') {
+          errorMessage = 'Podane hasło jest zbyt słabe.';
+        } else if (e.code == 'email-already-in-use') {
+          errorMessage = 'Konto dla tego adresu e-mail już istnieje.';
+        } else if (e.code == 'invalid-email') {
+          errorMessage = 'Adres e-mail jest nieprawidłowy.';
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage)),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Wystąpił nieoczekiwany błąd. Spróbuj ponownie.')),
+        );
       }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(errorMessage)),
-      );
-
-    } catch (e) {
-      print(e); // Dla celów debugowania
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Wystąpił nieoczekiwany błąd. Spróbuj ponownie.')),
-      );
     }
   }
+
+
+
+
 
 }
 
