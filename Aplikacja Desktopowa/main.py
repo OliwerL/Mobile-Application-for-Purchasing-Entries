@@ -14,6 +14,9 @@ from kivy.core.window import Window
 from smartcard.System import readers
 from smartcard.util import toHexString
 from smartcard.util import toASCIIString
+from database.zapisz import *
+from database.czytanie import *
+
 
 class CardGrid(FloatLayout):
     def __init__(self, **kwargs):
@@ -74,6 +77,13 @@ class CardGrid(FloatLayout):
 
         # Display UID
         content_layout.add_widget(Label(text=f"UID: {card_uid}"))
+
+        name, surname = wypisz_osobe_o_danym_uid(card_uid)
+        if name is not None and surname is not None:
+            popup.content.add_widget(Label(text=f"Imię: {name}"))
+            popup.content.add_widget(Label(text=f"Nazwisko: {surname}"))
+        else:
+            popup.content.add_widget(Label(text="Brak osoby o podanym UID"))
 
         # Read text data from the card
         text_data = self.read_text_data(card_uid)
@@ -160,5 +170,10 @@ class MyApp(App):
 if __name__ == '__main__':
     if hasattr(sys, '_MEIPASS'):
         resource_add_path((os.path.join(sys._MEIPASS)))
+
+    cred = credentials.Certificate("database/serviceAccountKey.json")
+    firebase_admin.initialize_app(cred, {
+        'databaseURL': 'https://test-bazy-danych-b89e6-default-rtdb.europe-west1.firebasedatabase.app/'
+    })
 
     MyApp().run()
