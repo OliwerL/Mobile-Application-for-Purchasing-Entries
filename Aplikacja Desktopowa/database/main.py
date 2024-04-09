@@ -3,7 +3,7 @@ from czytanie import *
 
 if __name__ == "__main__":
     # Inicjalizacja aplikacji Firebase
-    cred = credentials.Certificate("serviceAccountKey.json")
+    cred = credentials.Certificate("database\serviceAccountKey.json")
     firebase_admin.initialize_app(cred, {
         'databaseURL': 'https://test-bazy-danych-b89e6-default-rtdb.europe-west1.firebasedatabase.app/'
     })
@@ -12,18 +12,21 @@ if __name__ == "__main__":
     #zapisz_do_bazy_danych()
 
     nowa_osoba = {
-        "imie": "Jan",
-        "nazwisko": "Kowalski",
-        "email": "jan.kowalski@example.com",
-        "uid": "5E 86 F9 02"
+        "imie": "Sylwek",
+        "nazwisko": "Parzych",
+        "email": "sebastian.banino@wp.pl",
+        "uid": "12 AB 34 CD",
+        "wejsciowki": "Wejsciowka noob",
+        "termin_waznosci": "09.04.2024"
     }
 
     # Wywołanie funkcji dodaj_osobe_do_bazy_danych z danymi nowej osoby
-    #dodaj_osobe_do_bazy_danych(nowa_osoba)
+    dodaj_osobe_do_bazy_danych(nowa_osoba)
 
 
-    imie, nazwisko = wypisz_osobe_o_danym_uid("5E 86 F9 02")
-    if imie is None:
+    result = wypisz_osobe_o_danym_uid("12 AB 34 CD")
+    if result is None:
         print("Brak osoby o podanym UID")
     else:
-        print(f"Imię: {imie}, Nazwisko: {nazwisko}")
+        imie,nazwisko,wejsciowki,termin_waznosci=result
+        print(f"Imię: {imie}, Nazwisko: {nazwisko}, wejsciowki: {wejsciowki},termin waznosci: {termin_waznosci}")
