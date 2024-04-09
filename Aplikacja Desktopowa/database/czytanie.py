@@ -38,13 +38,16 @@ def wypisz_osobe_o_danym_uid(uid):
     data = ref.get()
 
     if data:
-        print("Imię, nazwisko i wiek osób:")
         for key, value in data.items():
+            print(value.get("uid"))
+            print(uid)
+            print(f"\n")
             if value.get("uid") == uid:
                 imie = value.get("imie")
                 nazwisko = value.get("nazwisko")
-                return imie, nazwisko
-            else:
-                return None, None
+                wejsciowki=value.get("wejsciowki")
+                termin_waznosci=value.get("termin_waznosci")
+                return imie, nazwisko, wejsciowki,termin_waznosci
+
     else:
-        return None
+        return None, None,None,None
