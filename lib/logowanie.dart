@@ -1,73 +1,59 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mhapp/rejestracja.dart';
 import 'package:mhapp/udalo_sie.dart';
+import 'package:mhapp/weryfikacja_mail.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController loginController = TextEditingController();
+    final TextEditingController emailController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
 
-    void login(BuildContext context, String identifier, String password) async {
-      final FirebaseFirestore firestore = FirebaseFirestore.instance;
-
+    void loginUser(BuildContext context, String email, String password) async {
       try {
-        // Sprawdzenie, czy podany identyfikator pasuje do pola `login` lub `email`
-        final QuerySnapshot result = await firestore
-            .collection('guests')
-            .where('login', isEqualTo: identifier)
-            .get();
+        UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
 
-        // Jeśli nie znaleziono pasującego loginu, sprawdź e-mail
-        if (result.docs.isEmpty) {
-          final QuerySnapshot emailResult = await firestore
-              .collection('guests')
-              .where('email', isEqualTo: identifier)
-              .get();
+        User? user = userCredential.user;
 
-          if (emailResult.docs.isEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Błędne dane logowania')),
-            );
-            return;
-          }
+        if (user != null) {
+          await user.reload(); // Odśwież informacje o użytkowniku, aby upewnić się, że mamy najnowsze dane
+          user = FirebaseAuth.instance.currentUser; // Ponownie pobierz informacje o aktualnym użytkowniku
 
-          // Sprawdzenie hasła dla e-maila
-          final Map<String, dynamic> emailData = emailResult.docs.first.data() as Map<String, dynamic>;
-          if (emailData['haslo'] == password) {
-            // Zalogowano pomyślnie przez e-mail
+          if (user?.emailVerified != true) {
+            // Jeśli e-mail nie został zweryfikowany, przenieś użytkownika na ekran informujący o konieczności weryfikacji
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => HelloScreen(docId: emailResult.docs.first.id)),
+              MaterialPageRoute(builder: (context) => EmailVerificationScreen()),
             );
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Błędne dane logowania')),
+            // Jeśli e-mail został zweryfikowany, przenieś użytkownika do kolejnego ekranu
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HelloScreen(docId: user?.uid ?? '')),
             );
           }
-          return;
         }
-
-        // Sprawdzenie hasła dla loginu
-        final Map<String, dynamic> data = result.docs.first.data() as Map<String, dynamic>;
-        if (data['haslo'] == password) {
-          // Zalogowano pomyślnie przez login
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => HelloScreen(docId: result.docs.first.id)),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Błędne dane logowania')),
-          );
+      } on FirebaseAuthException catch (e) {
+        String message = 'Wystąpił błąd podczas logowania.';
+        if (e.code == 'user-not-found') {
+          message = 'Nie znaleziono użytkownika.';
+        } else if (e.code == 'wrong-password') {
+          message = 'Błędne hasło.';
         }
-      } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Wystąpił błąd: $e')),
+          SnackBar(content: Text(message)),
+        );
+      } catch (e) {
+        // Inny rodzaj błędu, na przykład brak połączenia z internetem
+        print(e); // Dobrą praktyką jest zalogowanie błędu
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Wystąpił nieoczekiwany błąd.')),
         );
       }
     }
@@ -86,11 +72,11 @@ class LoginScreen extends StatelessWidget {
               const Text('Ekran logowania'),
               const SizedBox(height: 20),
               TextField(
-                controller: loginController,
+                controller: emailController,
                 decoration: const InputDecoration(
-                  labelText: 'Login',
+                  labelText: 'Email',
                   border: OutlineInputBorder(),
-                  hintText: 'Wpisz swój login',
+                  hintText: 'Wpisz swój email',
                 ),
               ),
               const SizedBox(height: 10),
@@ -105,7 +91,7 @@ class LoginScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () => login(context, loginController.text, passwordController.text),
+                onPressed: () => loginUser(context, emailController.text, passwordController.text),
                 child: const Text('Zaloguj się'),
               ),
               TextButton(
