@@ -79,7 +79,7 @@ class HelloScreen extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => NfcSendExample()),
+            MaterialPageRoute(builder: (context) => MyApp()), // Directly reference MyApp here
           );
         },
         child: Icon(Icons.nfc),
