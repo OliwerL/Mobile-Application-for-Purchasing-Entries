@@ -1,78 +1,87 @@
 import 'package:flutter/material.dart';
-import 'package:nfc_manager/nfc_manager.dart';
+import 'dart:async';
 
-class NfcSendExample extends StatefulWidget {
-  @override
-  _NfcSendExampleState createState() => _NfcSendExampleState();
+import 'package:flutter/services.dart';
+import 'package:nfc_emulator/nfc_emulator.dart';
+
+void main() {
+  runApp(MyApp());
 }
 
-class _NfcSendExampleState extends State<NfcSendExample> {
-  String _message = 'Masz małego z klocków lego';
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  String _platformVersion = 'Unknown';
+  NfcStatus _nfcStatus = NfcStatus.unknown;
+  bool _started = false;
 
   @override
   void initState() {
     super.initState();
-    _startNfcSession();
+    initPlatformState();
   }
 
-  void _startNfcSession() {
-    NfcManager.instance.startSession(
-      onDiscovered: (NfcTag tag) async {
-        var ndef = Ndef.from(tag);
-        if (ndef == null || !ndef.isWritable) {
-          print('NFC tag is not ndef or not writable');
-          return;
-        }
+  // Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> initPlatformState() async {
+    String? platformVersion;
+    NfcStatus nfcStatus = NfcStatus.unknown;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      platformVersion = await NfcEmulator.platformVersion;
+      nfcStatus = await NfcEmulator.nfcStatus;
+    } on PlatformException {
+      platformVersion = 'Failed to get platform version.';
+    }
 
-        try {
-          await ndef.write(NdefMessage([
-            NdefRecord.createText(_message),
-          ]));
-          print('Message sent: $_message');
-          _showDialog('Sukces', 'Wiadomość została przesłana.');
-        } catch (e) {
-          print('Failed to write to NFC tag: $e');
-          _showDialog('Błąd', 'Nie udało się zapisać na tagu NFC.');
-        }
-        },
-        onError: (e) async {
-          print('Error starting NFC session: $e');
-          _showDialog('Błąd NFC', 'Wystąpił błąd podczas uruchamiania sesji NFC: $e');
-        },
-    );
-  }
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
 
-  void _showDialog(String title, String content) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(content),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('OK'),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    NfcManager.instance.stopSession();
-    super.dispose();
+    setState(() {
+      _platformVersion = platformVersion ?? 'Unknown';
+      _nfcStatus = nfcStatus;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('NFC Send Example'),
-      ),
-      body: Center(
-        child: Text('Przyłóż urządzenie NFC do taga, aby przesłać wiadomość.'),
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('NFC Emulator Example'),
+        ),
+        body: Container(
+          alignment: Alignment.center,
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text('Version: $_platformVersion'),
+                SizedBox(height: 20.0),
+                Text('Status: $_nfcStatus'),
+                SizedBox(height: 40.0),
+                ElevatedButton(
+                    child: Text(_started ? "Stop Emulator" : "Start Emulator"),
+                    onPressed: startStopEmulator),
+              ]),
+        ),
       ),
     );
+  }
+
+  void startStopEmulator() async {
+    if (_started) {
+      await NfcEmulator.stopNfcEmulator();
+    } else {
+      await NfcEmulator.startNfcEmulator(
+          "666B65630001", "cd22c716", "79e64d05ed6475d3acf405d6a9cd506b");
+    }
+    setState(() {
+      _started = !_started;
+    });
   }
 }
