@@ -1,8 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mhapp/zmiana_danych.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 
 import 'NFC.dart';
@@ -79,7 +84,7 @@ class HelloScreen extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => MyApp()), // Directly reference MyApp here
+            MaterialPageRoute(builder: (context) => NfcSendExample()), // Directly reference MyApp here
           );
         },
         child: Icon(Icons.nfc),
@@ -128,6 +133,7 @@ class HelloScreen extends StatelessWidget {
 }
 
 class TicketsPurchaseScreen extends StatelessWidget {
+
   const TicketsPurchaseScreen({Key? key}) : super(key: key);
 
   @override
@@ -137,8 +143,32 @@ class TicketsPurchaseScreen extends StatelessWidget {
         title: const Text('Zakup Wejściówek'),
       ),
       body: Center(
-        child: Text('Tutaj możesz zakupić wejściówki.'),
+        child: StreamBuilder<User?>(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.active) {
+              // Sprawdzenie, czy dane są dostępne i czy użytkownik jest zalogowany
+              if (snapshot.hasData) {
+                // Użytkownik jest zalogowany, wyświetlamy jego ID
+                return QrImageView(
+                  data: "User ID: ${snapshot.data!.uid}",
+                  version: QrVersions.auto,
+                  size: 200,
+                  gapless: true,
+                );
+
+              } else {
+                // Użytkownik nie jest zalogowany
+                return Text("No user is logged in.");
+              }
+            } else {
+              // Wyświetlanie wskaźnika ładowania podczas oczekiwania na dane
+              return CircularProgressIndicator();
+            }
+          },
+        ),
       ),
     );
   }
 }
+
