@@ -1,15 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'more_options.dart';
-
-
 import 'NFC.dart';
-import 'logowanie.dart';
+import 'ticket_purchase.dart';
+import 'more_info.dart';
+import 'qrcode_view.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -20,7 +16,7 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   final List<Widget> _children = [
     HelloScreen(), // This is your original home screen
-    MoreOptionsScreen(),
+    MoreInfoScreen(),
     MoreOptionsScreen(), // The new screen with more options
     // Add more screens as needed
   ];
@@ -91,7 +87,7 @@ class HelloScreen extends StatelessWidget {
         children: [
           SizedBox(height: screenHeight/ 18),
           Center( // This centers the button container in its parent
-            child: Container(
+            child: SizedBox(
               width: screenWidth / 1.3,
               // Makes the button's width 1/3 of the screen's width
               height: screenHeight / 4,
@@ -101,7 +97,7 @@ class HelloScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => TicketsPurchaseScreen()),
+                        builder: (context) => const QRcodeScreen()),
                   );
                 },
                 child: const Text('Wejścia na skatepark',
@@ -112,7 +108,7 @@ class HelloScreen extends StatelessWidget {
           ),
           SizedBox(height: screenHeight/ 40),
           Center( // This centers the button container in its parent
-            child: Container(
+            child: SizedBox(
               width: screenWidth / 1.3,
               // Makes the button's width 1/3 of the screen's width
               height: screenHeight / 4,
@@ -122,7 +118,7 @@ class HelloScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => TicketsPurchaseScreen()),
+                        builder: (context) => const QRcodeScreen()),
                   );
                 },
                 child: const Text('Karnety na zajęcia',
@@ -133,7 +129,7 @@ class HelloScreen extends StatelessWidget {
           ),
           SizedBox(height: screenHeight/ 40),
           Center( // This centers the button container in its parent
-            child: Container(
+            child: SizedBox(
               width: screenWidth / 1.3,
               // Makes the button's width 1/3 of the screen's width
               height: screenHeight / 4,
@@ -157,45 +153,6 @@ class HelloScreen extends StatelessWidget {
       ),
     );
   }
-// Define the onSelected method inside the class
 }
-class TicketsPurchaseScreen extends StatelessWidget {
 
-  const TicketsPurchaseScreen({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Zakup Wejściówek'),
-      ),
-      body: Center(
-        child: StreamBuilder<User?>(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.active) {
-              // Sprawdzenie, czy dane są dostępne i czy użytkownik jest zalogowany
-              if (snapshot.hasData) {
-                // Użytkownik jest zalogowany, wyświetlamy jego ID
-                return QrImageView(
-                  data: "User ID: ${snapshot.data!.uid}",
-                  version: QrVersions.auto,
-                  size: 200,
-                  gapless: true,
-                );
-
-              } else {
-                // Użytkownik nie jest zalogowany
-                return Text("No user is logged in.");
-              }
-            } else {
-              // Wyświetlanie wskaźnika ładowania podczas oczekiwania na dane
-              return CircularProgressIndicator();
-            }
-          },
-        ),
-      ),
-    );
-  }
-}
 

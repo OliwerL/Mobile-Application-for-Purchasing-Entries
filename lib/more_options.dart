@@ -12,6 +12,11 @@ class MoreOptionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Opcje"),
+        backgroundColor: Colors.red[900],
+        foregroundColor: Colors.white,
+      ),
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
