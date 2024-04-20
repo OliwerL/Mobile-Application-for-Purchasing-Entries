@@ -35,7 +35,7 @@ class LoginScreen extends StatelessWidget {
             // Jeśli e-mail został zweryfikowany, przenieś użytkownika do kolejnego ekranu
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => HelloScreen(docId: user?.uid ?? '')),
+              MaterialPageRoute(builder: (context) => MainScreen()),
             );
           }
         }

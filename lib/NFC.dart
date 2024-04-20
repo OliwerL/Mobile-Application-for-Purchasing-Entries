@@ -13,7 +13,7 @@ class _NfcSendExampleState extends State<NfcSendExample> {
 
 
   String _message = 'Poprawnie przesłano';
-  String? _userId;  // Dodaj zmienną do przechowywania userId
+  String? _userId; // Dodaj zmienną do przechowywania userId
 
   @override
   void initState() {
@@ -28,13 +28,16 @@ class _NfcSendExampleState extends State<NfcSendExample> {
     });
     _startNfcSession();
   }
+
   void _fetchUserId() {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      _userId = user.uid;  // Przypisz userId do zmiennej
+      _userId = user.uid; // Przypisz userId do zmiennej
       _message = _userId!; // Ustaw _message na userId
+      _message = "RollMaster Card";
     }
   }
+
   void _startNfcSession() {
     NfcManager.instance.startSession(
       onDiscovered: (NfcTag tag) async {
@@ -57,7 +60,8 @@ class _NfcSendExampleState extends State<NfcSendExample> {
       },
       onError: (e) async {
         print('Error starting NFC session: $e');
-        _showDialog('Błąd NFC', 'Wystąpił błąd podczas uruchamiania sesji NFC: $e');
+        _showDialog(
+            'Błąd NFC', 'Wystąpił błąd podczas uruchamiania sesji NFC: $e');
       },
     );
   }
@@ -65,16 +69,17 @@ class _NfcSendExampleState extends State<NfcSendExample> {
   void _showDialog(String title, String content) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(content),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('OK'),
-            onPressed: () => Navigator.of(context).pop(),
+      builder: (context) =>
+          AlertDialog(
+            title: Text(title),
+            content: Text(content),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('OK'),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -86,12 +91,51 @@ class _NfcSendExampleState extends State<NfcSendExample> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width; // Gets the screen width
+    double screenHeight = MediaQuery.of(context).size.height; // Gets the screen height
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('NFC Send Example'),
+        title: Text('RollMaster Card'),
+        foregroundColor: Colors.white,
+        backgroundColor: Colors.red[900],
       ),
-      body: Center(
-        child: Text('Przyłóż urządzenie NFC do taga, aby przesłać wiadomość.'),
+      body: Container(
+        padding: EdgeInsets.all(16), // Adds padding around the outer container
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/background.png"),
+            fit: BoxFit.fitWidth,
+            repeat: ImageRepeat.repeatY,
+          ),
+        ),
+        child: Center(
+          child: Container(
+            width: screenWidth * 0.8, // Sets the width to 80% of the screen width
+            height: screenHeight * 0.2, // Sets the height to 20% of the screen height
+            padding: EdgeInsets.all(20), // Adds padding inside the container
+            decoration: BoxDecoration(
+              color: Colors.white, // Background color of the rectangle
+              borderRadius: BorderRadius.circular(8), // Rounded corners
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1), // Shadow color
+                  spreadRadius: 5,
+                  blurRadius: 7,
+                  offset: Offset(0, 3), // Shadow position
+                ),
+              ],
+            ),
+            child: const Text(
+              'Przyłóż urządzenie do karty.',
+              textAlign: TextAlign.center, // Centers the text inside the container
+              style: TextStyle(
+                fontSize: 18, // Font size
+                color: Colors.black, // Text color
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
             if (user == null) {
               return const LoginScreen(); // Użytkownik nie jest zalogowany, pokazuje ekran logowania
             }
-            return const HelloScreen(); // Użytkownik jest zalogowany, pokazuje inny ekran
+            return MainScreen(); // Użytkownik jest zalogowany, pokazuje inny ekran
           }
           return const Scaffold(
             body: Center(
