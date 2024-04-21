@@ -1,12 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class MoreInfoScreen extends StatelessWidget {
+class MyTicketsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Informacje"),
+        title: const Text("Moje karnety"),
         backgroundColor: Colors.red[900],
         foregroundColor: Colors.white,
       ),
@@ -19,12 +19,13 @@ class MoreInfoScreen extends StatelessWidget {
           ),
         ),
         child: const Center(
-          // Center the column to ensure the text is visible
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center, // Zapewnia wyśrodkowanie wertykalne
+            crossAxisAlignment: CrossAxisAlignment.center, // Zapewnia wyśrodkowanie horyzontalne
             children: [
               Text(
-                "Więcej informacji",
+                "Tu wyświetlą się Twoje karnety po kupnie",
+                textAlign: TextAlign.center, // Dodano wyśrodkowanie tekstu w obrębie Text widget
                 style: TextStyle(
                     color: Colors.white,
                     fontSize: 24), // Makes text white and larger

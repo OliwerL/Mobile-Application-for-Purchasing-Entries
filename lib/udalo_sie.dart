@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mhapp/pass_purchase.dart';
 
 import 'more_options.dart';
 import 'NFC.dart';
@@ -16,7 +17,7 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   final List<Widget> _children = [
     HelloScreen(), // This is your original home screen
-    MoreInfoScreen(),
+    MyTicketsScreen(),
     MoreOptionsScreen(), // The new screen with more options
     // Add more screens as needed
   ];
@@ -48,8 +49,8 @@ class _MainScreenState extends State<MainScreen> {
             label: 'Oferta',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.info, color: Colors.red[900],),
-            label: 'Więcej',
+            icon: Icon(Icons.confirmation_num, color: Colors.red[900],),
+            label: 'Karnety',
           ),
           const BottomNavigationBarItem(
             icon: Icon(Icons.menu, color: Colors.black,),
@@ -70,7 +71,7 @@ class HelloScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width; // Gets the screen width
-    double screenHeight = MediaQuery.of(context).size.height;
+    double screenHeight = MediaQuery.of(context).size.height - 45;
     // Return your screen content without a Scaffold
     return Container(
       decoration: const BoxDecoration(
@@ -85,7 +86,7 @@ class HelloScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          SizedBox(height: screenHeight/ 18),
+          SizedBox(height: screenHeight/ 10),
           Center( // This centers the button container in its parent
             child: SizedBox(
               width: screenWidth / 1.3,
@@ -93,11 +94,14 @@ class HelloScreen extends StatelessWidget {
               height: screenHeight / 4,
               child: MaterialButton(
                 color: Colors.red[900],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20), // zaokrąglone rogi o promieniu 20
+                ),
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const QRcodeScreen()),
+                        builder: (context) => const TicketsPurchaseScreen()),
                   );
                 },
                 child: const Text('Wejścia na skatepark',
@@ -114,11 +118,14 @@ class HelloScreen extends StatelessWidget {
               height: screenHeight / 4,
               child: MaterialButton(
                 color: Colors.red[900],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20), // zaokrąglone rogi o promieniu 20
+                ),
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const QRcodeScreen()),
+                        builder: (context) => const PassPurchaseScreen()),
                   );
                 },
                 child: const Text('Karnety na zajęcia',
@@ -135,6 +142,9 @@ class HelloScreen extends StatelessWidget {
               height: screenHeight / 4,
               child: MaterialButton(
                 color: Colors.red[900],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20), // zaokrąglone rogi o promieniu 20
+                ),
                 onPressed: () {
                   Navigator.push(
                     context,

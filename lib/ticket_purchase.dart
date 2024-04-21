@@ -37,6 +37,7 @@ class TicketsPurchaseScreen extends StatelessWidget {
                     version: QrVersions.auto,
                     size: 200,
                     gapless: true,
+                    backgroundColor: Colors.white,
                   );
                 } else {
                   // Użytkownik nie jest zalogowany
