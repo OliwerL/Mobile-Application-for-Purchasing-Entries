@@ -1,6 +1,7 @@
 import firebase_admin
 from firebase_admin import credentials, db
-
+import sys, os
+from kivy.resources import resource_add_path
 #czytanie danych z bazy danych
 
 def odczytaj_z_bazy_danych():
@@ -39,15 +40,25 @@ def wypisz_osobe_o_danym_uid(uid):
 
     if data:
         for key, value in data.items():
-            print(value.get("uid"))
-            print(uid)
-            print(f"\n")
             if value.get("uid") == uid:
                 imie = value.get("imie")
                 nazwisko = value.get("nazwisko")
                 wejsciowki=value.get("wejsciowki")
                 termin_waznosci=value.get("termin_waznosci")
                 return imie, nazwisko, wejsciowki,termin_waznosci
+        return None, None,None,None
 
     else:
         return None, None,None,None
+
+
+
+if __name__ == '__main__':
+    if hasattr(sys, '_MEIPASS'):
+        resource_add_path((os.path.join(sys._MEIPASS)))
+
+    cred = credentials.Certificate("serviceAccountKey.json")
+    firebase_admin.initialize_app(cred, {
+        'databaseURL': 'https://test-bazy-danych-b89e6-default-rtdb.europe-west1.firebasedatabase.app/'
+    })
+    odczytaj_z_bazy_danych()

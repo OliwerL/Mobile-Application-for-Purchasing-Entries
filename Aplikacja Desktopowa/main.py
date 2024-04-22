@@ -1,3 +1,5 @@
+import time
+
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
@@ -16,6 +18,7 @@ from smartcard.util import toHexString
 from smartcard.util import toASCIIString
 from database.zapisz import *
 from database.czytanie import *
+from read_data_from_all_sectors import read_data_from_all_card_sectors
 
 
 class CardGrid(FloatLayout):
@@ -28,7 +31,7 @@ class CardGrid(FloatLayout):
 
     def init_grid(self):
         # Load the background image
-        background_image = Image(source="tlo.jpg", allow_stretch=True, keep_ratio=False)
+        background_image = Image(source="skater.jpg", allow_stretch=True, keep_ratio=False)
         self.add_widget(background_image)
 
         # Create the label for "NFC WEJŚCIÓWKI" text with a white color
@@ -78,7 +81,7 @@ class CardGrid(FloatLayout):
         # Display UID
         content_layout.add_widget(Label(text=f"UID: {card_uid}"))
 
-        name, surname = wypisz_osobe_o_danym_uid(card_uid)
+        name, surname, entrance, date = wypisz_osobe_o_danym_uid(card_uid)
         if name is not None and surname is not None:
             popup.content.add_widget(Label(text=f"Imię: {name}"))
             popup.content.add_widget(Label(text=f"Nazwisko: {surname}"))
@@ -86,7 +89,15 @@ class CardGrid(FloatLayout):
             popup.content.add_widget(Label(text="Brak osoby o podanym UID"))
 
         # Read text data from the card
-        text_data = self.read_text_data(card_uid)
+        retries = 3
+        text_data = None
+        for i in range(retries):
+            text_data = read_data_from_all_card_sectors()
+            if text_data:
+                break
+            else:
+                time.sleep(0.2)
+
         if text_data:
             content_layout.add_widget(Label(text=f"Text on card: {text_data}"))
         else:
@@ -125,33 +136,6 @@ class CardGrid(FloatLayout):
                 return None
 
         except Exception as e:
-            return None
-
-    def read_text_data(self, card_uid):
-        """ Read text data from an NFC card using the provided UID. """
-        if not self.nfc_reader:
-            return None
-
-        try:
-            # Example command to read NDEF records from an NFC card
-            command = [0xFF, 0xB0, 0x00, 0x04, 0x10]
-
-            # Send command and receive the response
-            data, sw1, sw2 = self.nfc_reader.transmit(command)
-
-            # Check the status words
-            if sw1 == 0x90 and sw2 == 0x00:
-                # Successful response
-                # Assuming the data is UTF-8 encoded text
-                text_data = toASCIIString(data)
-                return text_data
-            else:
-                # Error in response
-                print(f"Failed to read text data from the card: SW1={sw1:02X}, SW2={sw2:02X}")
-                return None
-
-        except Exception as e:
-            print("Error:", e)
             return None
 
 
