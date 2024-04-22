@@ -22,17 +22,15 @@ class LoginScreen extends StatelessWidget {
         User? user = userCredential.user;
 
         if (user != null) {
-          await user.reload(); // Odśwież informacje o użytkowniku, aby upewnić się, że mamy najnowsze dane
-          user = FirebaseAuth.instance.currentUser; // Ponownie pobierz informacje o aktualnym użytkowniku
+          await user.reload();
+          user = FirebaseAuth.instance.currentUser;
 
           if (user?.emailVerified != true) {
-            // Jeśli e-mail nie został zweryfikowany, przenieś użytkownika na ekran informujący o konieczności weryfikacji
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => EmailVerificationScreen()),
             );
           } else {
-            // Jeśli e-mail został zweryfikowany, przenieś użytkownika do kolejnego ekranu
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => MainScreen()),
@@ -50,60 +48,92 @@ class LoginScreen extends StatelessWidget {
           SnackBar(content: Text(message)),
         );
       } catch (e) {
-        // Inny rodzaj błędu, na przykład brak połączenia z internetem
-        print(e); // Dobrą praktyką jest zalogowanie błędu
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Wystąpił nieoczekiwany błąd.')),
         );
       }
     }
 
+    double screenHeight = MediaQuery.of(context).size.height - AppBar().preferredSize.height;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Logowanie'),
+        backgroundColor: Colors.grey[350],
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Ekran logowania'),
-              const SizedBox(height: 20),
-              TextField(
-                controller: emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
-                  hintText: 'Wpisz swój email',
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/background.png"),
+            fit: BoxFit.fitWidth,
+            repeat: ImageRepeat.repeatY,
+          ),
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(height: screenHeight / 20),
+                TextField(
+                  controller: emailController,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    hintText: 'Wpisz swój email',
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: passwordController,
-                decoration: const InputDecoration(
-                  labelText: 'Hasło',
-                  border: OutlineInputBorder(),
-                  hintText: 'Wpisz swoje hasło',
+                SizedBox(height: screenHeight / 40),
+                TextField(
+                  controller: passwordController,
+                  decoration: InputDecoration(
+                    labelText: 'Hasło',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    hintText: 'Wpisz swoje hasło',
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                  obscureText: true,
                 ),
-                obscureText: true,
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () => loginUser(context, emailController.text, passwordController.text),
-                child: const Text('Zaloguj się'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const RegistrationScreen()),
-                  );
-                },
-                child: const Text('Nie masz konta? Zarejestruj się'),
-              ),
-            ],
+                SizedBox(height: screenHeight / 20),
+                MaterialButton(
+                  color: Colors.red[900],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  onPressed: () => loginUser(context, emailController.text, passwordController.text),
+                  child: Text(
+                    'Zaloguj się',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const RegistrationScreen()),
+                    );
+                  },
+                  child: const Text(
+                    'Nie masz konta? Zarejestruj się',
+                    style: TextStyle(
+                      color: Colors.white
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
