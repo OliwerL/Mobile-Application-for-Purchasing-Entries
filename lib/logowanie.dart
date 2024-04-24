@@ -12,6 +12,27 @@ class LoginScreen extends StatelessWidget {
     final TextEditingController emailController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
 
+    void resetPassword(BuildContext context) async {
+      String email = emailController.text.trim();
+      if (email.isEmpty || !email.contains('@')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Proszę podać prawidłowy adres e-mail.')),
+        );
+        return;
+      }
+      try {
+        await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Jeśli adres e-mail istnieje w naszej bazie danych, wysłaliśmy link do resetowania hasła.')),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Wystąpił błąd przy wysyłaniu linku do resetowania hasła.')),
+        );
+      }
+    }
+
+
     void loginUser(BuildContext context, String email, String password) async {
       try {
         UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -38,18 +59,18 @@ class LoginScreen extends StatelessWidget {
           }
         }
       } on FirebaseAuthException catch (e) {
-        String message = 'Wystąpił błąd podczas logowania.';
-        if (e.code == 'user-not-found') {
-          message = 'Nie znaleziono użytkownika.';
-        } else if (e.code == 'wrong-password') {
-          message = 'Błędne hasło.';
+        String message = "Wystąpił błąd podczas logowania.";  // Domyślny komunikat błędu
+        if (e.code == 'invalid-email') {
+          message = 'Nie znaleziono użytkownika.';  // Specyficzny błąd gdy użytkownik nie istnieje
+        } else if (e.code == 'invalid-credential') {
+          message = 'Błędne hasło.';  // Specyficzny błąd gdy hasło jest błędne
         }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(message)),
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Wystąpił nieoczekiwany błąd.')),
+          const SnackBar(content: Text('Wystąpił nieoczekiwany błąd.')),
         );
       }
     }
@@ -102,14 +123,13 @@ class LoginScreen extends StatelessWidget {
                   ),
                   obscureText: true,
                 ),
+
+
                 SizedBox(height: screenHeight / 20),
                 MaterialButton(
                   color: Colors.red[900],
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
                   onPressed: () => loginUser(context, emailController.text, passwordController.text),
-                  child: Text(
+                  child: const Text(
                     'Zaloguj się',
                     style: TextStyle(
                       color: Colors.white,
@@ -130,6 +150,13 @@ class LoginScreen extends StatelessWidget {
                     style: TextStyle(
                       color: Colors.white
                     ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => resetPassword(context),
+                  child: const Text(
+                    'Zresetuj hasło',
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
               ],
