@@ -49,13 +49,30 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ustawienia Konta'),
+        backgroundColor: Colors.red[900],
+        foregroundColor: Colors.white,
       ),
       body: _isLoading
+
           ? Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
+          : Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/background.png"),
+
+            fit: BoxFit.fitWidth,
+            repeat: ImageRepeat.repeatY,
+          ),
+        ),
+
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Form(
           key: _formKey,
@@ -63,9 +80,15 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
             children: [
               TextFormField(
                 controller: _firstNameController,
+                style: TextStyle(
+                    color: Colors.white
+                ),
                 decoration: InputDecoration(
+
                   labelText: 'Imię',
+                  labelStyle: TextStyle(color: Colors.red[400]),
                   errorText: _firstNameError, // Używamy zmiennej _firstNameError do wyświetlenia błędu
+                  errorStyle: TextStyle(color: Colors.red[400]),
                 ),
                 validator: (value) {
                   if (value!.isEmpty) {
@@ -79,9 +102,14 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
 
               TextFormField(
                 controller: _lastNameController,
+                style: TextStyle(
+                    color: Colors.white
+                ),
                 decoration: InputDecoration(
                   labelText: 'Nazwisko',
+                  labelStyle: TextStyle(color: Colors.red[400]),
                   errorText: _lastNameError, // Używamy zmiennej _lastNameError do wyświetlenia błędu
+                  errorStyle: TextStyle(color: Colors.red[400]),
                 ),
                 validator: (value) {
                   if (value!.isEmpty) {
@@ -95,17 +123,27 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
 
               TextFormField(
                 controller: _phoneNumberController,
+                style: TextStyle(
+                    color: Colors.white
+                ),
                 decoration: InputDecoration(
                   labelText: 'Numer telefonu',
+                  labelStyle: TextStyle(color: Colors.red[400]),
                   errorText: _phoneNumberError,  // Wyświetlanie komunikatu o błędzie
+                  errorStyle: TextStyle(color: Colors.red[400]),
                 ),
                 keyboardType: TextInputType.phone,
               ),
               TextFormField(
                 controller: _newPasswordController,
+                style: TextStyle(
+                    color: Colors.white
+                ),
                 decoration: InputDecoration(
                   labelText: 'Nowe Hasło',
+                  labelStyle: TextStyle(color: Colors.red[400]),
                   errorText: _passwordError, // Używamy zmiennej _passwordError do wyświetlenia błędu
+                  errorStyle: TextStyle(color: Colors.red[400]),
                 ),
                 obscureText: true, // Ukrywa wprowadzane hasło
                 validator: (value) {
@@ -118,23 +156,41 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
 
               TextFormField(
                 controller: _newPasswordController2,
+                style: TextStyle(
+                    color: Colors.white
+                ),
                 decoration: InputDecoration(
                   labelText: 'Powtórz Hasło',
+                  labelStyle: TextStyle(color: Colors.red[400]),
                   errorText: _passwordError, // Ponownie używamy zmiennej _passwordError do wyświetlenia błędu
+                  errorStyle: TextStyle(color: Colors.red[400]),
                 ),
                 obscureText: true, // Ukrywa wprowadzane hasło
               ),
 
               const SizedBox(height: 20),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red[900], // Button color
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
                 onPressed: _updateUserSettings,
-                child: const Text('Zaktualizuj Dane'),
+                child: const Text(
+                  'Zaktualizuj dane',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
           ),
         ),
       ),
+
+
+      ),
     );
+
   }
 
   void _updateUserSettings() async {
@@ -208,19 +264,19 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     }
   }
 
-  }
+}
 
 
 
 
-  // @override
-  // void dispose() {
-  //   // Pamiętaj o zwolnieniu kontrolerów, aby uniknąć wycieków pamięci
-  //   _firstNameController.dispose();
-  //   _lastNameController.dispose();
-  //   _phoneNumberController.dispose();
-  //   _newPasswordController.dispose();
-  //   super.dispose();
-  // }
+// @override
+// void dispose() {
+//   // Pamiętaj o zwolnieniu kontrolerów, aby uniknąć wycieków pamięci
+//   _firstNameController.dispose();
+//   _lastNameController.dispose();
+//   _phoneNumberController.dispose();
+//   _newPasswordController.dispose();
+//   super.dispose();
+// }
 
 

@@ -80,7 +80,8 @@ class LoginScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Logowanie'),
-        backgroundColor: Colors.grey[350],
+        backgroundColor: Colors.red[900],
+        foregroundColor: Colors.white,
       ),
       body: Container(
         decoration: const BoxDecoration(
@@ -96,6 +97,15 @@ class LoginScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                SizedBox(height: screenHeight / 20),
+                SizedBox(
+                  height: screenHeight / 5,
+
+                  child: Image.asset(
+                    "assets/login_logo.png",
+                    fit: BoxFit.cover,  // Dostosuj obraz do rozmiaru SizedBox
+                  ),
+                ),
                 SizedBox(height: screenHeight / 20),
                 TextField(
                   controller: emailController,

@@ -4,10 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mhapp/qrcode_view.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-import 'buying_coins.dart';
-
-class TicketsPurchaseScreen extends StatelessWidget {
-  const TicketsPurchaseScreen({Key? key}) : super(key: key);
+class BuyingCoinsScreen extends StatelessWidget {
+  const BuyingCoinsScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +13,7 @@ class TicketsPurchaseScreen extends StatelessWidget {
     double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Karnety"),
+        title: const Text("MasterCoins"),
         backgroundColor: Colors.red[900],
         foregroundColor: Colors.white,
       ),
@@ -33,30 +31,49 @@ class TicketsPurchaseScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                const Text('Kup MasterCoin',
+                const Text('Czym są MasterCoins?',
                     style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.white)),
                 const SizedBox(height: 20),
-                GridView.count(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  padding: EdgeInsets.all(screenWidth * 0.05),
-                  children: <Widget>[
-                    _createButton(
-                        context, '1 Złoty MasterCoin', const BuyingCoinsScreen()),
-                    _createButton(
-                        context, '2 Złote MasterCoiny', const BuyingCoinsScreen()),
-                    _createButton(
-                        context, '1 Czerwony MasterCoin', const BuyingCoinsScreen()),
-                    _createButton(
-                        context, '2 Czerwone MasterCoiny', const BuyingCoinsScreen()),
-                  ],
+
+                Container(
+                  padding: EdgeInsets.all(15.0), // Dostosuj wypełnienie według potrzeb
+
+                  child: const Text(
+                    'DOpis co to są MasterCoins pewnie będzie dl;uższy więc napisze jakieś głupoty żeby bardziej oddawało wizualnie. Litwo ojczyzno moja tyjesteś jak zdrowie ile cie trzeba cenić ten tylko sie dowie kto cie stracil',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
+
+
+
+                const SizedBox(height: 40),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red[900], // Button color
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => QRcodeScreen()), // Przekierowanie do klasy QRcodeScreen
+                    );
+                  },
+                  child: const Text(
+                    'Kup MasterCoin',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+
+
 
 
               ],
@@ -81,7 +98,7 @@ class TicketsPurchaseScreen extends StatelessWidget {
         child: Text(text,
             style: const TextStyle(
                 color: Colors.white,
-                fontSize: 18,
+                fontSize: 20,
                 fontWeight: FontWeight.bold)),
       ),
     );
