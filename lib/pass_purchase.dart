@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'qrcode_view.dart';
+import 'buying_passes.dart';
 
 class PassPurchaseScreen extends StatelessWidget {
   const PassPurchaseScreen({Key? key}) : super(key: key);
@@ -45,13 +46,13 @@ class PassPurchaseScreen extends StatelessWidget {
                   padding: EdgeInsets.all(screenWidth * 0.05),
                   children: <Widget>[
                     _createButton(
-                        context, '1h zajęć', const QRcodeScreen(ticket_data: "karnet")),
+                        context, '1h zajęć', const BuyingPassScreen(passName: "Karnet 1h")),
                     _createButton(
-                        context, 'Karnet 4h', const QRcodeScreen(ticket_data: "karnet")),
+                        context, 'Karnet 4h', const BuyingPassScreen(passName: "Karnet 4h")),
                     _createButton(
-                        context, 'Karnet 8h', const QRcodeScreen(ticket_data: "karnet")),
+                        context, 'Karnet 8h', const BuyingPassScreen(passName: "Karnet 8h")),
                     _createButton(
-                        context, 'Karnet Open', const QRcodeScreen(ticket_data: "karnet")),
+                        context, 'Karnet Open', const BuyingPassScreen(passName: "Karnet Open")),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -69,13 +70,13 @@ class PassPurchaseScreen extends StatelessWidget {
                   mainAxisSpacing: 10,
                   padding: EdgeInsets.all(screenWidth * 0.05),
                   children: <Widget>[
-                    _createButton(context, 'Karnet 2x 4h', const QRcodeScreen(ticket_data: "karnet",)),
+                    _createButton(context, 'Karnet 2x 4h', const BuyingPassScreen(passName: "Karnet 2x 4h")),
                     // Adjust as necessary
-                    _createButton(context, 'Karnet 3x 4h', const QRcodeScreen(ticket_data: "karnet")),
+                    _createButton(context, 'Karnet 3x 4h', const BuyingPassScreen(passName: "Karnet 3x 4h")),
                     // Adjust as necessary
-                    _createButton(context, 'Karnet 4x 4h', const QRcodeScreen(ticket_data: "karnet")),
+                    _createButton(context, 'Karnet 4x 4h', const BuyingPassScreen(passName: "Karnet 4x 4h")),
                     // Adjust as necessary
-                    _createButton(context, 'Family Open 3os.', const QRcodeScreen(ticket_data: "karnet")),
+                    _createButton(context, 'Family Open 3os.', const BuyingPassScreen(passName: "Karnet Family Open 3os.")),
                     // Adjust as necessary
                   ],
                 ),

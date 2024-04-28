@@ -13,69 +13,113 @@ class MyTicketsScreen extends StatefulWidget {
 class _MyTicketsScreenState extends State<MyTicketsScreen> {
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width; // Get screen width
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height-40-163;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Moje karnety"),
+        title: const Text("Moje wejścia"),
         backgroundColor: Colors.red[900],
         foregroundColor: Colors.white,
       ),
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: const BoxDecoration( // Apply the background decoration here
           image: DecorationImage(
             image: AssetImage("assets/background.png"),
             fit: BoxFit.fitWidth,
             repeat: ImageRepeat.repeatY,
           ),
         ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  width: screenWidth * 0.7,
-                  padding: const EdgeInsets.all(10.0),
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: Colors.amber[700],
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  alignment: Alignment.center,
-                  child: Consumer<CoinData>(
-                    builder: (context, coinData, child) => GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const QRcodeScreen(ticket_data: "mastercoin",)), // Navigate to QRCodeView screen
-                        );
-                      },
-                      child: Text(
-                        'Moje mastercoin: ${coinData.myMastercoin}',
-                        style: const TextStyle(
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+        child: SingleChildScrollView( // Enable scrolling across the entire body
+          child: Center(
+            child: Consumer<CoinData>(
+              builder: (context, coinData, child) => Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      width: screenWidth * 0.7,
+                      padding: const EdgeInsets.all(10.0),
+                      height: screenHeight * 0.2,
+                      decoration: BoxDecoration(
+                        color: Colors.amber[700],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      alignment: Alignment.center,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const QRcodeScreen(
+                                ticket_data: "mastercoin",
+                              ),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          'Moje mastercoin: ${coinData.myMastercoin}',
+                          style: const TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
                       ),
                     ),
                   ),
-                ),
+                  const SizedBox(height: 20),
+                  Container(
+                    width: screenWidth * 0.7,
+                    height: screenHeight *0.8,
+                    child: Column( // Replace ListView.builder with a Column for linear layout
+                      children: List.generate(coinData.purchasedTickets.length, (index) {
+                        return Container(
+                          margin: const EdgeInsets.symmetric(vertical: 8.0),
+                          padding: const EdgeInsets.all(8.0),
+                          height: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.amber[700],
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.amber[700],
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              elevation: 0,
+                              padding: EdgeInsets.symmetric(vertical: 8),
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => QRcodeScreen(
+                                    ticket_data: coinData.purchasedTickets[index],
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              'Pokaż QR: ${coinData.purchasedTickets[index]}',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
-              const Text(
-                "Tu wyświetlą się Twoje karnety po kupnie",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24),
-              ),
-            ],
+            ),
           ),
         ),
       ),
