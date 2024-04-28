@@ -1,11 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:mhapp/qrcode_view.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+import 'package:provider/provider.dart';
+
+import 'coin_data.dart';
 
 class BuyingCoinsScreen extends StatelessWidget {
-  const BuyingCoinsScreen({Key? key}) : super(key: key);
+  final int coinAmount; // Variable to store the integer value
+
+  // Constructor with an integer parameter
+  const BuyingCoinsScreen({Key? key, required this.coinAmount}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -37,12 +40,16 @@ class BuyingCoinsScreen extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         color: Colors.white)),
                 const SizedBox(height: 20),
-
+                Text('Ilość MasterCoins do kupienia: $coinAmount',
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white)),
+                const SizedBox(height: 20),
                 Container(
-                  padding: EdgeInsets.all(15.0), // Dostosuj wypełnienie według potrzeb
-
+                  padding: EdgeInsets.all(15.0),
                   child: const Text(
-                    'DOpis co to są MasterCoins pewnie będzie dl;uższy więc napisze jakieś głupoty żeby bardziej oddawało wizualnie. Litwo ojczyzno moja tyjesteś jak zdrowie ile cie trzeba cenić ten tylko sie dowie kto cie stracil',
+                    'DOpis co to są MasterCoins pewnie będzie dłuższy więc napisze jakieś głupoty żeby bardziej oddawało wizualnie. Litwo ojczyzno moja ty jesteś jak zdrowie ile cie trzeba cenić ten tylko sie dowie kto cie stracił',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -50,9 +57,6 @@ class BuyingCoinsScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-
-
-
                 const SizedBox(height: 40),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -62,9 +66,23 @@ class BuyingCoinsScreen extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => QRcodeScreen()), // Przekierowanie do klasy QRcodeScreen
+                    Provider.of<CoinData>(context, listen: false).addCoins(coinAmount);
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text("Informacja"),
+                          content: const Text("Zakup zakończony pomyślnie!"),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(); // Close the dialog
+                              },
+                              child: const Text('OK'),
+                            ),
+                          ],
+                        );
+                      },
                     );
                   },
                   child: const Text(
@@ -72,34 +90,10 @@ class BuyingCoinsScreen extends StatelessWidget {
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
-
-
-
-
               ],
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _createButton(BuildContext context, String text, Widget page) {
-    return Opacity(
-      opacity: 0.7, // Apply opacity to the entire button
-      child: MaterialButton(
-        color: Colors.black45,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => page),
-          );
-        },
-        child: Text(text,
-            style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold)),
       ),
     );
   }

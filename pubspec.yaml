@@ -43,7 +43,7 @@ dependencies:
   url_launcher: ^6.0.12
   permission_handler: ^10.2.0
   nfc_emulator: ^2.0.0-nullsafety.0
-
+  provider: ^6.0.0
 
 dev_dependencies:
   flutter_test:

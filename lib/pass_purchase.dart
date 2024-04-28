@@ -45,13 +45,13 @@ class PassPurchaseScreen extends StatelessWidget {
                   padding: EdgeInsets.all(screenWidth * 0.05),
                   children: <Widget>[
                     _createButton(
-                        context, '1h zajęć', const QRcodeScreen()),
+                        context, '1h zajęć', const QRcodeScreen(ticket_data: "karnet")),
                     _createButton(
-                        context, 'Karnet 4h', const QRcodeScreen()),
+                        context, 'Karnet 4h', const QRcodeScreen(ticket_data: "karnet")),
                     _createButton(
-                        context, 'Karnet 8h', const QRcodeScreen()),
+                        context, 'Karnet 8h', const QRcodeScreen(ticket_data: "karnet")),
                     _createButton(
-                        context, 'Karnet Open', const QRcodeScreen()),
+                        context, 'Karnet Open', const QRcodeScreen(ticket_data: "karnet")),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -69,13 +69,13 @@ class PassPurchaseScreen extends StatelessWidget {
                   mainAxisSpacing: 10,
                   padding: EdgeInsets.all(screenWidth * 0.05),
                   children: <Widget>[
-                    _createButton(context, 'Karnet 2x 4h', const QRcodeScreen()),
+                    _createButton(context, 'Karnet 2x 4h', const QRcodeScreen(ticket_data: "karnet",)),
                     // Adjust as necessary
-                    _createButton(context, 'Karnet 3x 4h', const QRcodeScreen()),
+                    _createButton(context, 'Karnet 3x 4h', const QRcodeScreen(ticket_data: "karnet")),
                     // Adjust as necessary
-                    _createButton(context, 'Karnet 4x 4h', const QRcodeScreen()),
+                    _createButton(context, 'Karnet 4x 4h', const QRcodeScreen(ticket_data: "karnet")),
                     // Adjust as necessary
-                    _createButton(context, 'Family Open 3os.', const QRcodeScreen()),
+                    _createButton(context, 'Family Open 3os.', const QRcodeScreen(ticket_data: "karnet")),
                     // Adjust as necessary
                   ],
                 ),

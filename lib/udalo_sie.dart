@@ -5,7 +5,7 @@ import 'package:mhapp/pass_purchase.dart';
 import 'more_options.dart';
 import 'NFC.dart';
 import 'ticket_purchase.dart';
-import 'more_info.dart';
+import 'my_tickets.dart';
 import 'qrcode_view.dart';
 
 class MainScreen extends StatefulWidget {

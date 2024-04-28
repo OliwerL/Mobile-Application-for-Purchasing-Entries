@@ -1,8 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:mhapp/qrcode_view.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 
 import 'buying_coins.dart';
 
@@ -48,13 +45,13 @@ class TicketsPurchaseScreen extends StatelessWidget {
                   padding: EdgeInsets.all(screenWidth * 0.05),
                   children: <Widget>[
                     _createButton(
-                        context, '1 Złoty MasterCoin', const BuyingCoinsScreen()),
+                        context, '1 MasterCoin', const BuyingCoinsScreen(coinAmount: 1)),
                     _createButton(
-                        context, '2 Złote MasterCoiny', const BuyingCoinsScreen()),
+                        context, '4 MasterCoin', const BuyingCoinsScreen(coinAmount: 4)),
                     _createButton(
-                        context, '1 Czerwony MasterCoin', const BuyingCoinsScreen()),
+                        context, '8 MasterCoin', const BuyingCoinsScreen(coinAmount: 8)),
                     _createButton(
-                        context, '2 Czerwone MasterCoiny', const BuyingCoinsScreen()),
+                        context, '16 MasterCoin', const BuyingCoinsScreen(coinAmount: 16)),
                   ],
                 ),
 

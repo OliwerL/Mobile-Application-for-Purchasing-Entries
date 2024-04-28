@@ -4,7 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class QRcodeScreen extends StatelessWidget {
-  const QRcodeScreen({Key? key}) : super(key: key);
+  final String ticket_data;
+
+  const QRcodeScreen({Key? key, required this.ticket_data}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +35,7 @@ class QRcodeScreen extends StatelessWidget {
                 if (snapshot.hasData) {
                   // Użytkownik jest zalogowany, wyświetlamy jego ID
                   return QrImageView(
-                    data: "User ID: ${snapshot.data!.uid}",
+                    data: "User ID: ${snapshot.data!.uid} Type: $ticket_data",
                     version: QrVersions.auto,
                     size: 200,
                     gapless: true,
