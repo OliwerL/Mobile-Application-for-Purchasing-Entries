@@ -72,7 +72,7 @@ class CardGrid(FloatLayout):
             self.handle_card_state(card_uid)
 
     def handle_card_state(self, card_uid):
-        popup = Popup(title='Udało się odczytać kartę!', size_hint=(None, None), size=(400, 400))
+        popup = Popup(title='Udało się odczytać kartę!', size_hint=(None, None), size=(400, 500))
         popup.background_color = (0, 1, 0, 1)
 
         content_layout = BoxLayout(orientation='vertical')
@@ -102,6 +102,53 @@ class CardGrid(FloatLayout):
             content_layout.add_widget(Label(text=f"Text on card: {text_data}"))
         else:
             content_layout.add_widget(Label(text="Failed to read text data from the card."))
+
+        # Ticket type dropdown
+        ticket_type_label = Label(text="Typ biletu:")
+        ticket_type_dropdown = DropDown()
+        for type_option in ['Normalny', 'Ulgowy', 'Premium']:
+            btn = Button(text=type_option, size_hint_y=None, height=44)
+            btn.bind(on_release=lambda btn: ticket_type_dropdown.select(btn.text))
+            ticket_type_dropdown.add_widget(btn)
+
+        ticket_type_btn = Button(text='Wybierz typ biletu', size_hint=(None, None), size=(150, 44))
+        ticket_type_btn.bind(on_release=ticket_type_dropdown.open)
+        ticket_type_dropdown.bind(on_select=lambda instance, x: setattr(ticket_type_btn, 'text', x))
+        content_layout.add_widget(ticket_type_label)
+        content_layout.add_widget(ticket_type_btn)
+
+        # Entrance option dropdown
+        entrance_label = Label(text="Wejścia biletu:")
+        entrance_dropdown = DropDown()
+        for entrance_option in ['1 wejście', '4 wejścia', '12 wejść']:
+            btn = Button(text=entrance_option, size_hint_y=None, height=44)
+            btn.bind(on_release=lambda btn: entrance_dropdown.select(btn.text))
+            entrance_dropdown.add_widget(btn)
+
+        entrance_btn = Button(text='Wybierz wejścia', size_hint=(None, None), size=(150, 44))
+        entrance_btn.bind(on_release=entrance_dropdown.open)
+        entrance_dropdown.bind(on_select=lambda instance, x: setattr(entrance_btn, 'text', x))
+        content_layout.add_widget(entrance_label)
+        content_layout.add_widget(entrance_btn)
+
+        # Time-based ticket dropdown
+        time_ticket_label = Label(text="Bilet czasowy:")
+        time_ticket_dropdown = DropDown()
+        for time_option in ['1 dzień', '1 tydzień', '1 miesiąc']:
+            btn = Button(text=time_option, size_hint_y=None, height=44)
+            btn.bind(on_release=lambda btn: time_ticket_dropdown.select(btn.text))
+            time_ticket_dropdown.add_widget(btn)
+
+        time_ticket_btn = Button(text='Wybierz bilet czasowy', size_hint=(None, None), size=(150, 44))
+        time_ticket_btn.bind(on_release=time_ticket_dropdown.open)
+        time_ticket_dropdown.bind(on_select=lambda instance, x: setattr(time_ticket_btn, 'text', x))
+        content_layout.add_widget(time_ticket_label)
+        content_layout.add_widget(time_ticket_btn)
+
+        # Button to purchase ticket
+        purchase_button = Button(text='Kup bilet', on_press=lambda event: self.handle_ticket_purchase(card_uid, ticket_type_btn.text, entrance_btn.text, time_ticket_btn.text), size_hint=(None, None), size=(100, 50),
+                            pos_hint={'center_x': 0.5, 'y': 0})
+        content_layout.add_widget(purchase_button)
 
         close_button = Button(text='Zamknij', on_press=popup.dismiss, size_hint=(None, None), size=(100, 50),
                               pos_hint={'center_x': 0.5, 'y': 0})
@@ -138,6 +185,35 @@ class CardGrid(FloatLayout):
         except Exception as e:
             return None
 
+    # Function to update user data in Firebase after a successful ticket purchase
+    def update_user_data(self, user_id, ticket_info):
+        ref = db.reference(f'uzytkownicy/{user_id}/tickets')
+        ref.push(ticket_info)
+
+    def handle_ticket_purchase(self, card_uid, ticket_type, entrance_option, time_ticket):
+        # Logic for processing payment and generating ticket information
+        ticket_details = {
+            'ticket_type': ticket_type,
+            'entrance_option': entrance_option,
+            'time_ticket': time_ticket,
+            'expiration_date': None  # This will be calculated for time-based tickets
+        }
+
+        if 'dzień' in time_ticket:
+            days = 1
+        elif 'tydzień' in time_ticket:
+            days = 7
+        elif 'miesiąc' in time_ticket:
+            days = 30
+        else:
+            days = 0
+
+        if days:
+            expiration_date = datetime.now() + timedelta(days=days)
+            ticket_details['expiration_date'] = expiration_date.strftime('%Y-%m-%d %H:%M:%S')
+
+        # Update user data in Firebase
+        self.update_user_data(card_uid, ticket_details)
 
 class MyApp(App):
     def build(self):
