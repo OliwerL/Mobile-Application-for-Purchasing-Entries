@@ -1,0 +1,32 @@
+#:kivy 2.0.0
+
+ScreenManager:
+    MainScreen:
+
+<MainScreen>:
+    name: 'main_screen'
+
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(10)
+        padding: dp(10)
+
+        # Poniższy fragment można usunąć lub zakomentować, ponieważ pasek narzędziowy
+        # jest teraz tworzony bezpośrednio w kodzie Pythona
+        # MDToolbar:
+        #     title: 'Skaner kodów QR'
+        #     elevation: 10
+
+        BoxLayout:
+            orientation: 'vertical'
+            padding: dp(20)
+            MDTextField:
+                id: scanned_data_field
+                hint_text: "Zeskanowane dane"
+                readonly: True
+                multiline: True
+                size_hint_y: None
+                height: dp(100)
+            MDRaisedButton:
+                text: "Skanuj kod QR"
+                on_press: app.scan_qr_code()
