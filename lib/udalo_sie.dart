@@ -91,7 +91,7 @@ class HelloScreen extends StatelessWidget {
             child: SizedBox(
               width: screenWidth / 1.3,
               // Makes the button's width 1/3 of the screen's width
-              height: screenHeight / 4,
+              height: screenHeight / 5,
               child: MaterialButton(
                 color: Colors.red[900],
                 shape: RoundedRectangleBorder(
@@ -115,7 +115,7 @@ class HelloScreen extends StatelessWidget {
             child: SizedBox(
               width: screenWidth / 1.3,
               // Makes the button's width 1/3 of the screen's width
-              height: screenHeight / 4,
+              height: screenHeight / 5,
               child: MaterialButton(
                 color: Colors.red[900],
                 shape: RoundedRectangleBorder(
@@ -139,7 +139,7 @@ class HelloScreen extends StatelessWidget {
             child: SizedBox(
               width: screenWidth / 1.3,
               // Makes the button's width 1/3 of the screen's width
-              height: screenHeight / 4,
+              height: screenHeight / 5,
               child: MaterialButton(
                 color: Colors.red[900],
                 shape: RoundedRectangleBorder(
@@ -159,7 +159,30 @@ class HelloScreen extends StatelessWidget {
               ),
             ),
           ),
-        ],
+      SizedBox(height: screenHeight / 40),
+      Center( // This centers the button container in its parent
+      child: SizedBox(
+      width: screenWidth / 1.3,
+      // Makes the button's width 1/3 of the screen's width
+      height: screenHeight / 10,
+      child: MaterialButton(
+        color: Colors.red[900],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20), // zaokrąglone rogi o promieniu 20
+        ),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => QRcodeScreen(ticket_data: 'Sample Ticket Data')), // Dodajemy nowy przycisk
+          );
+        },
+        child: const Text(
+            'View QR Code', style: TextStyle(color: Colors.white, fontSize: 20,  // Increase the font size
+            fontWeight: FontWeight.bold)),
+          )
+        )
+      )],
       ),
     );
   }

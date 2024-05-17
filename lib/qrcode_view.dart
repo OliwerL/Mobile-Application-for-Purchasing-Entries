@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 class QRcodeScreen extends StatelessWidget {
   final String ticket_data;
@@ -22,8 +24,7 @@ class QRcodeScreen extends StatelessWidget {
             image: AssetImage("assets/background.png"),
             // Ensure the image is added in pubspec.yaml
             fit: BoxFit.fitWidth,
-            repeat:
-            ImageRepeat.repeatY, // This will cover the entire background
+            repeat: ImageRepeat.repeatY, // This will cover the entire background
           ),
         ),
         child: Center(
@@ -31,22 +32,47 @@ class QRcodeScreen extends StatelessWidget {
             stream: FirebaseAuth.instance.authStateChanges(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.active) {
-                // Sprawdzenie, czy dane są dostępne i czy użytkownik jest zalogowany
                 if (snapshot.hasData) {
-                  // Użytkownik jest zalogowany, wyświetlamy jego ID
-                  return QrImageView(
-                    data: "User ID: ${snapshot.data!.uid} Type: $ticket_data",
-                    version: QrVersions.auto,
-                    size: 200,
-                    gapless: true,
-                    backgroundColor: Colors.white,
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      QrImageView(
+                        data: "User ID: ${snapshot.data!.uid} Type: $ticket_data",
+                        version: QrVersions.auto,
+                        size: 200,
+                        gapless: true,
+                        backgroundColor: Colors.white,
+                      ),
+                      const SizedBox(height: 20),
+                      Expanded(
+                        child: FlutterMap(
+                          options: MapOptions(
+                            initialCenter: LatLng(53.773610, 20.495450),
+                            initialZoom: 11,
+                            interactionOptions:
+                              const InteractionOptions(flags: ~InteractiveFlag.doubleTapZoom,)
+                          ),
+                          children: [
+                            openStreetMapTileLayer,
+                            MarkerLayer(markers: [Marker(
+                                point: LatLng(53.773610, 20.495450),
+                                width: 60,
+                                height: 60,
+                                alignment: Alignment.centerLeft,
+                                child: Icon(
+                                  Icons.location_pin,
+                                  size: 60,
+                                  color: Colors.red,
+                                ))])
+                          ],
+                        ),
+                      ),
+                    ],
                   );
                 } else {
-                  // Użytkownik nie jest zalogowany
                   return const Text("No user is logged in.");
                 }
               } else {
-                // Wyświetlanie wskaźnika ładowania podczas oczekiwania na dane
                 return const CircularProgressIndicator();
               }
             },
@@ -55,4 +81,9 @@ class QRcodeScreen extends StatelessWidget {
       ),
     );
   }
+
+  TileLayer get openStreetMapTileLayer => TileLayer(
+    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    userAgentPackageName: 'dev.fleaflet.flutter_map.example',
+  );
 }
