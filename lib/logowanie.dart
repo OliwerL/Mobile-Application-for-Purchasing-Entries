@@ -23,19 +23,23 @@ class LoginScreen extends StatelessWidget {
       try {
         await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Jeśli adres e-mail istnieje w naszej bazie danych, wysłaliśmy link do resetowania hasła.')),
+          SnackBar(
+              content: Text(
+                  'Jeśli adres e-mail istnieje w naszej bazie danych, wysłaliśmy link do resetowania hasła.')),
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Wystąpił błąd przy wysyłaniu linku do resetowania hasła.')),
+          SnackBar(
+              content: Text(
+                  'Wystąpił błąd przy wysyłaniu linku do resetowania hasła.')),
         );
       }
     }
 
-
     void loginUser(BuildContext context, String email, String password) async {
       try {
-        UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        UserCredential userCredential =
+            await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: email,
           password: password,
         );
@@ -49,7 +53,8 @@ class LoginScreen extends StatelessWidget {
           if (user?.emailVerified != true) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => EmailVerificationScreen()),
+              MaterialPageRoute(
+                  builder: (context) => EmailVerificationScreen()),
             );
           } else {
             Navigator.pushReplacement(
@@ -59,11 +64,13 @@ class LoginScreen extends StatelessWidget {
           }
         }
       } on FirebaseAuthException catch (e) {
-        String message = "Wystąpił błąd podczas logowania.";  // Domyślny komunikat błędu
+        String message =
+            "Wystąpił błąd podczas logowania."; // Domyślny komunikat błędu
         if (e.code == 'invalid-email') {
-          message = 'Nie znaleziono użytkownika.';  // Specyficzny błąd gdy użytkownik nie istnieje
+          message =
+              'Nie znaleziono użytkownika.'; // Specyficzny błąd gdy użytkownik nie istnieje
         } else if (e.code == 'invalid-credential') {
-          message = 'Błędne hasło.';  // Specyficzny błąd gdy hasło jest błędne
+          message = 'Błędne hasło.'; // Specyficzny błąd gdy hasło jest błędne
         }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(message)),
@@ -75,7 +82,8 @@ class LoginScreen extends StatelessWidget {
       }
     }
 
-    double screenHeight = MediaQuery.of(context).size.height - AppBar().preferredSize.height;
+    //double screenHeight =
+      //  MediaQuery.of(context).size.height - AppBar().preferredSize.height;
 
     return Scaffold(
       appBar: AppBar(
@@ -92,84 +100,83 @@ class LoginScreen extends StatelessWidget {
           ),
         ),
         child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(height: screenHeight / 20),
-                SizedBox(
-                  height: screenHeight / 5,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: 190,
+                    child: Image.asset(
+                      "assets/login_logo.png",
+                      fit: BoxFit.cover, // Dostosuj obraz do rozmiaru SizedBox
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  TextField(
+                    controller: emailController,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      hintText: 'Wpisz swój email',
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  TextField(
+                    controller: passwordController,
+                    decoration: InputDecoration(
+                      labelText: 'Hasło',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      hintText: 'Wpisz swoje hasło',
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                    obscureText: true,
+                  ),
 
-                  child: Image.asset(
-                    "assets/login_logo.png",
-                    fit: BoxFit.cover,  // Dostosuj obraz do rozmiaru SizedBox
-                  ),
-                ),
-                SizedBox(height: screenHeight / 20),
-                TextField(
-                  controller: emailController,
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    hintText: 'Wpisz swój email',
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                ),
-                SizedBox(height: screenHeight / 40),
-                TextField(
-                  controller: passwordController,
-                  decoration: InputDecoration(
-                    labelText: 'Hasło',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    hintText: 'Wpisz swoje hasło',
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                  obscureText: true,
-                ),
-
-
-                SizedBox(height: screenHeight / 20),
-                MaterialButton(
-                  color: Colors.red[900],
-                  onPressed: () => loginUser(context, emailController.text, passwordController.text),
-                  child: const Text(
-                    'Zaloguj się',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                  SizedBox(height: 15),
+                  MaterialButton(
+                    color: Colors.red[900],
+                    onPressed: () => loginUser(
+                        context, emailController.text, passwordController.text),
+                    child: const Text(
+                      'Zaloguj się',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const RegistrationScreen()),
-                    );
-                  },
-                  child: const Text(
-                    'Nie masz konta? Zarejestruj się',
-                    style: TextStyle(
-                      color: Colors.white
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const RegistrationScreen()),
+                      );
+                    },
+                    child: const Text(
+                      'Nie masz konta? Zarejestruj się',
+                      style: TextStyle(color: Colors.white),
                     ),
                   ),
-                ),
-                TextButton(
-                  onPressed: () => resetPassword(context),
-                  child: const Text(
-                    'Zresetuj hasło',
-                    style: TextStyle(color: Colors.white),
+                  TextButton(
+                    onPressed: () => resetPassword(context),
+                    child: const Text(
+                      'Zresetuj hasło',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
