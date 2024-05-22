@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mhapp/konkakt.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mhapp/zmiana_danych.dart';
@@ -89,6 +90,12 @@ void onSelected(BuildContext context, int item) async { // Make the function asy
       ));
       break;
     case 3:
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ContactScreen(),
+        ),
+      );
       break;
     case 4:
       break;

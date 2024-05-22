@@ -244,6 +244,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             'email': _emailController.text,
             'login': _loginController.text,
             'phoneNumber': _phoneNumberController.text,
+            'coins':0,
           });
 
           ScaffoldMessenger.of(context).showSnackBar(

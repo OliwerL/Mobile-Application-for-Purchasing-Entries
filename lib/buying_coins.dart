@@ -1,13 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'coin_data.dart';
 
 class BuyingCoinsScreen extends StatelessWidget {
-  final int coinAmount; // Variable to store the integer value
+  final int coinAmount;
 
-  // Constructor with an integer parameter
   const BuyingCoinsScreen({Key? key, required this.coinAmount}) : super(key: key);
 
   @override
@@ -65,8 +63,8 @@ class BuyingCoinsScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  onPressed: () {
-                    Provider.of<CoinData>(context, listen: false).addCoins(coinAmount);
+                  onPressed: () async {
+                    await Provider.of<CoinData>(context, listen: false).addCoins(coinAmount);
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {

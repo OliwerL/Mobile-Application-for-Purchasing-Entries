@@ -12,9 +12,16 @@ class MyTicketsScreen extends StatefulWidget {
 
 class _MyTicketsScreenState extends State<MyTicketsScreen> {
   @override
+  void initState() {
+    super.initState();
+    // Fetch the user's MasterCoins when the screen is initialized
+    Provider.of<CoinData>(context, listen: false).fetchCoins();
+  }
+
+  @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height-40-163;
+    double screenHeight = MediaQuery.of(context).size.height - 40 - 163;
 
     return Scaffold(
       appBar: AppBar(
@@ -23,14 +30,14 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
         foregroundColor: Colors.white,
       ),
       body: Container(
-        decoration: const BoxDecoration( // Apply the background decoration here
+        decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage("assets/background.png"),
             fit: BoxFit.fitWidth,
             repeat: ImageRepeat.repeatY,
           ),
         ),
-        child: SingleChildScrollView( // Enable scrolling across the entire body
+        child: SingleChildScrollView(
           child: Center(
             child: Consumer<CoinData>(
               builder: (context, coinData, child) => Column(
@@ -75,8 +82,8 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
                   const SizedBox(height: 20),
                   Container(
                     width: screenWidth * 0.7,
-                    height: screenHeight *0.8,
-                    child: Column( // Replace ListView.builder with a Column for linear layout
+                    height: screenHeight * 0.8,
+                    child: Column(
                       children: List.generate(coinData.purchasedTickets.length, (index) {
                         return Container(
                           margin: const EdgeInsets.symmetric(vertical: 8.0),
