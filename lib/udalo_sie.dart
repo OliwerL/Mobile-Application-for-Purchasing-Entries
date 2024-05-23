@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mhapp/pass_purchase.dart';
+import 'package:provider/provider.dart';
 
+import 'coin_data.dart';
 import 'more_options.dart';
 import 'NFC.dart';
 import 'ticket_purchase.dart';
@@ -24,6 +26,8 @@ class _MainScreenState extends State<MainScreen> {
 
   void onTabTapped(int index) {
     setState(() {
+      Provider.of<CoinData>(context, listen: false).fetchCoins();
+      Provider.of<CoinData>(context, listen: false).fetchPurchasedTickets();
       _currentIndex = index;
     });
   }

@@ -12,13 +12,6 @@ class MyTicketsScreen extends StatefulWidget {
 
 class _MyTicketsScreenState extends State<MyTicketsScreen> {
   @override
-  void initState() {
-    super.initState();
-    // Fetch the user's MasterCoins when the screen is initialized
-    Provider.of<CoinData>(context, listen: false).fetchCoins();
-  }
-
-  @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height - 40 - 163;

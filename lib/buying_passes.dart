@@ -1,14 +1,61 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import 'coin_data.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
+import 'package:firebase_auth/firebase_auth.dart';
 
 class BuyingPassScreen extends StatelessWidget {
   final String passName; // Variable to store the integer value
 
   // Constructor with an integer parameter
   const BuyingPassScreen({Key? key, required this.passName}) : super(key: key);
+
+  Future<void> _buyPass(BuildContext context) async {
+    try {
+      // Update Firestore with the purchased pass
+      String? userid = FirebaseAuth.instance.currentUser?.uid;
+      await FirebaseFirestore.instance.collection('users').doc(userid) // Replace with actual user ID
+          .update({passName: 1});
+
+      // Show success dialog
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("Informacja"),
+            content: const Text("Zakup zakończony pomyślnie!"),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      // Show error dialog
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("Błąd"),
+            content: const Text("Wystąpił błąd podczas zakupu."),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,24 +107,7 @@ class BuyingPassScreen extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    Provider.of<CoinData>(context, listen: false).buyTicket(passName);
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text("Informacja"),
-                          content: const Text("Zakup zakończony pomyślnie!"),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(); // Close the dialog
-                              },
-                              child: const Text('OK'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
+                    _buyPass(context);
                   },
                   child: const Text(
                     'Kup karnet',

@@ -62,24 +62,29 @@ class PassPurchaseScreen extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         color: Colors.white)),
                 const SizedBox(height: 20),
-                GridView.count(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  padding: EdgeInsets.all(screenWidth * 0.05),
-                  children: <Widget>[
-                    _createButton(context, 'Karnet 2x 4h', const BuyingPassScreen(passName: "Karnet 2x 4h")),
-                    // Adjust as necessary
-                    _createButton(context, 'Karnet 3x 4h', const BuyingPassScreen(passName: "Karnet 3x 4h")),
-                    // Adjust as necessary
-                    _createButton(context, 'Karnet 4x 4h', const BuyingPassScreen(passName: "Karnet 4x 4h")),
-                    // Adjust as necessary
-                    _createButton(context, 'Family Open 3os.', const BuyingPassScreen(passName: "Karnet Family Open 3os.")),
-                    // Adjust as necessary
-                  ],
-                ),
+                const Text('Wkrótce',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w300,
+                        color: Colors.grey)),
+                // GridView.count(
+                //   shrinkWrap: true,
+                //   physics: NeverScrollableScrollPhysics(),
+                //   crossAxisCount: 2,
+                //   crossAxisSpacing: 10,
+                //   mainAxisSpacing: 10,
+                //   padding: EdgeInsets.all(screenWidth * 0.05),
+                //   children: <Widget>[
+                //     _createButton(context, 'Karnet 2x 4h', const BuyingPassScreen(passName: "Karnet 2x 4h")),
+                //     // Adjust as necessary
+                //     _createButton(context, 'Karnet 3x 4h', const BuyingPassScreen(passName: "Karnet 3x 4h")),
+                //     // Adjust as necessary
+                //     _createButton(context, 'Karnet 4x 4h', const BuyingPassScreen(passName: "Karnet 4x 4h")),
+                //     // Adjust as necessary
+                //     _createButton(context, 'Family Open 3os.', const BuyingPassScreen(passName: "Karnet Family Open 3os.")),
+                //     // Adjust as necessary
+                //   ],
+                // ),
               ],
             ),
           ),
