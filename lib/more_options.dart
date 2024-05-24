@@ -5,8 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mhapp/zmiana_danych.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 
 import 'logowanie.dart';
 class MoreOptionsScreen extends StatelessWidget {
@@ -84,7 +83,7 @@ void onSelected(BuildContext context, int item) async { // Make the function asy
       await launchUrl(url); // Use launchUrl with the Uri object
       break;
     case 2: // Logout case
-    // Handle your logout logic here
+      await FirebaseAuth.instance.signOut(); // Ensure user is signed out
       Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (context) => LoginScreen(), // Replace with your login screen class
       ));
