@@ -245,10 +245,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             'login': _loginController.text,
             'phoneNumber': _phoneNumberController.text,
             'coins':0,
-            'Karnet 1h':0,
-            'Karnet 4h':0,
-            'Karnet 8h':0,
-            'Karnet Open':0,
+            'Karnet_1h':0,
+            'Karnet_4h':0,
+            'Karnet_8h':0,
+            'Karnet_Open':0,
           });
 
           ScaffoldMessenger.of(context).showSnackBar(

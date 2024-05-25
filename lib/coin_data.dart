@@ -49,10 +49,10 @@ class CoinData with ChangeNotifier {
         purchasedTickets.clear();
         Map<String, dynamic> data = docSnapshot.data() as Map<String, dynamic>;
 
-        if (data['Karnet 1h'] == 1) purchasedTickets.add('Karnet 1h');
-        if (data['Karnet 4h'] == 1) purchasedTickets.add('Karnet 4h');
-        if (data['Karnet 8h'] == 1) purchasedTickets.add('Karnet 8h');
-        if (data['Karnet Open'] == 1) purchasedTickets.add('Karnet Open');
+        if (data['Karnet_1h'] >= 1) purchasedTickets.add('Karnet 1h');
+        if (data['Karnet_4h'] >= 1) purchasedTickets.add('Karnet 4h');
+        if (data['Karnet_8h'] >= 1) purchasedTickets.add('Karnet 8h');
+        if (data['Karnet_Open'] >= 1) purchasedTickets.add('Karnet Open');
 
         notifyListeners();
       } else {

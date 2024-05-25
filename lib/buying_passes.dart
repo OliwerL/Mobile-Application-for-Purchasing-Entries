@@ -14,7 +14,22 @@ class BuyingPassScreen extends StatelessWidget {
     try {
       // Update Firestore with the purchased pass
       String? userid = FirebaseAuth.instance.currentUser?.uid;
-      await FirebaseFirestore.instance.collection('users').doc(userid) // Replace with actual user ID
+      if (passName == 'Karnet 1h') {
+        await FirebaseFirestore.instance.collection('users').doc(userid).update({'Karnet_1h': 1});
+      }
+      else if (passName == 'Karnet 4h') {
+        await FirebaseFirestore.instance.collection('users').doc(userid).update({'Karnet_4h': 4});
+      }
+      else if (passName == 'Karnet 8h') {
+        await FirebaseFirestore.instance.collection('users').doc(userid).update(
+            {'Karnet_8h': 8});
+      }
+      else if (passName == 'Karnet Open') {
+        await FirebaseFirestore.instance.collection('users').doc(userid).update({'Karnet_Open': 1});
+      }
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userid) // Replace with actual user ID
           .update({passName: 1});
 
       // Show success dialog
