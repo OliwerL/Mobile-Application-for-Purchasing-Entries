@@ -1,8 +1,8 @@
 import sys
 import time
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QHBoxLayout, QGridLayout, QGroupBox, QPushButton, QMessageBox
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QHBoxLayout, QGridLayout, QGroupBox, QPushButton, QMessageBox, QSpacerItem, QSizePolicy
+from PyQt5.QtGui import QPixmap, QImage
+from PyQt5.QtCore import QTimer, Qt
 from smartcard.System import readers
 from smartcard.util import toHexString
 
@@ -19,12 +19,17 @@ firebase_admin.initialize_app(cred, {
 })
 db = firestore.client()
 
+import cv2
+from pyzbar import pyzbar
+import re  # Import regex module
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
         self.setWindowTitle("NFC WEJŚCIÓWKI")
-        self.setGeometry(100, 100, 900, 600)
+        self.setGeometry(100, 100, 1200, 800)
 
         self.nfc_reader = self.connect_reader()
         self.card_uid = None
@@ -34,6 +39,13 @@ class MainWindow(QMainWindow):
         self.timer = QTimer()
         self.timer.timeout.connect(self.check_nfc_card)
         self.timer.start(80)
+
+        self.cap = cv2.VideoCapture(1)  # Initialize the camera
+        self.qr_timer = QTimer()
+        self.qr_timer.timeout.connect(self.update_camera)
+        self.qr_timer.start(80)
+        self.last_seen_qr = {}
+        self.display_time_interval = 2  # Time interval in seconds
 
     def init_ui(self):
         self.central_widget = QWidget()
@@ -48,6 +60,11 @@ class MainWindow(QMainWindow):
         self.coins_group = QGroupBox("Coins")
         self.karnety_group = QGroupBox("Karnety")
 
+        # Set font size for group boxes
+        self.name_group.setStyleSheet("font-size: 18px;")
+        self.coins_group.setStyleSheet("font-size: 18px;")
+        self.karnety_group.setStyleSheet("font-size: 18px;")
+
         self.name_layout = QVBoxLayout()
         self.coins_layout = QVBoxLayout()
         self.karnety_layout = QVBoxLayout()
@@ -58,6 +75,14 @@ class MainWindow(QMainWindow):
         self.karnet_4h_label = QLabel("Karnet_4h: ")
         self.karnet_8h_label = QLabel("Karnet_8h: ")
         self.karnet_open_label = QLabel("Karnet_Open: ")
+
+        # Set font size for labels
+        self.name_label.setStyleSheet("font-size: 16px;")
+        self.coins_label.setStyleSheet("font-size: 16px;")
+        self.karnet_1h_label.setStyleSheet("font-size: 16px;")
+        self.karnet_4h_label.setStyleSheet("font-size: 16px;")
+        self.karnet_8h_label.setStyleSheet("font-size: 16px;")
+        self.karnet_open_label.setStyleSheet("font-size: 16px;")
 
         self.coins_buttons = QHBoxLayout()
         self.karnet_1h_buttons = QHBoxLayout()
@@ -111,6 +136,15 @@ class MainWindow(QMainWindow):
         self.data_layout.addWidget(self.coins_group, 1, 0)
         self.data_layout.addWidget(self.karnety_group, 2, 0)
 
+        # Add camera feed display
+        self.camera_label = QLabel()
+        self.camera_label.setFixedSize(320, 240)  # Set a fixed size for the camera display
+        self.data_layout.addWidget(self.camera_label, 0, 1, 3, 1, Qt.AlignTop | Qt.AlignRight)  # Align top-right and span rows
+
+        # Adjust column stretch to resize properly
+        self.data_layout.setColumnStretch(0, 3)
+        self.data_layout.setColumnStretch(1, 1)
+
         # Connect buttons to methods
         self.coins_add_button.clicked.connect(lambda: self.update_field('coins', 1))
         self.coins_remove_button.clicked.connect(lambda: self.update_field('coins', -1))
@@ -163,7 +197,8 @@ class MainWindow(QMainWindow):
             self.user_data = self.get_user_data_by_card_text(card_text_key)
             if self.user_data:
                 self.user_data['id'] = card_text_key  # Store card text key as ID for updates
-                self.name_label.setText(f"Name: {self.user_data.get('firstName', 'Brak danych')} {self.user_data.get('lastName', 'Brak danych')}\nEmail: {self.user_data.get('email', 'Brak danych')}")
+                self.name_label.setText(
+                    f"Name: {self.user_data.get('firstName', 'Brak danych')} {self.user_data.get('lastName', 'Brak danych')}\nEmail: {self.user_data.get('email', 'Brak danych')}")
                 self.coins_label.setText(f"Coins: {self.user_data.get('coins', 'Brak danych')}")
                 self.karnet_1h_label.setText(f"Karnet_1h: {self.user_data.get('Karnet_1h', 'Brak danych')}")
                 self.karnet_4h_label.setText(f"Karnet_4h: {self.user_data.get('Karnet_4h', 'Brak danych')}")
@@ -234,6 +269,105 @@ class MainWindow(QMainWindow):
                     self.karnet_open_label.setText(f"Karnet_Open: {new_value}")
         except Exception as e:
             print(f"Error updating field {field}: {e}")
+
+    def update_camera(self):
+        ret, frame = self.cap.read()
+        if ret:
+            frame = self.read_qr_code(frame, self.last_seen_qr, self.display_time_interval)
+            self.display_frame(frame)
+
+    def display_frame(self, frame):
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        h, w, ch = rgb_frame.shape
+        bytes_per_line = ch * w
+        qt_image = QImage(rgb_frame.data, w, h, bytes_per_line, QImage.Format_RGB888)
+        self.camera_label.setPixmap(QPixmap.fromImage(qt_image))
+
+    def read_qr_code(self, frame, last_seen_times, display_time_interval):
+        current_time = time.time()
+        qr_codes = pyzbar.decode(frame)
+        visible_qr_codes = set()
+
+        for qr_code in qr_codes:
+            qr_data = qr_code.data.decode('utf-8')
+            visible_qr_codes.add(qr_data)
+
+            if qr_data not in last_seen_times or (current_time - last_seen_times[qr_data]) > display_time_interval:
+                print(f"QR Code Data: {qr_data}")
+                last_seen_times[qr_data] = current_time
+                self.handle_qr_code(qr_data)
+
+            x, y, w, h = qr_code.rect
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            cv2.putText(frame, qr_data, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+        to_remove = [key for key, value in last_seen_times.items() if (current_time - value) > display_time_interval]
+        for key in to_remove:
+            del last_seen_times[key]
+
+        return frame
+
+    def handle_qr_code(self, qr_data):
+        # Extract ID and Type from the QR code data using regex
+        id_match = re.search(r"ID: ([\w\d]+)", qr_data)
+        type_match = re.search(r"Type: ([\w\d\s]+)", qr_data)
+
+        if id_match and type_match:
+            card_text_key = id_match.group(1)
+            qr_type = type_match.group(1)
+
+            user_data = self.get_user_data_by_card_text(card_text_key)
+            if user_data:
+                self.user_data = user_data
+                self.user_data['id'] = card_text_key
+
+                # Check the availability of the ticket
+                if (qr_type == "Karnet 1h" and self.user_data.get('Karnet_1h', 0) <= 0) or \
+                   (qr_type == "Karnet 4h" and self.user_data.get('Karnet_4h', 0) <= 0) or \
+                   (qr_type == "Karnet 8h" and self.user_data.get('Karnet_8h', 0) <= 0) or \
+                   (qr_type == "Karnet_Open" and self.user_data.get('Karnet_Open', 0) <= 0):
+                    msg = QMessageBox(self)
+                    msg.setWindowTitle("Brak wybranego karnetu")
+                    msg.setStyleSheet("background-color: red;")
+                    msg.setText("Brak wybranego karnetu")
+                    msg.exec_()
+                    return
+
+                # Update the UI
+                self.name_label.setText(
+                    f"Name: {self.user_data.get('firstName', 'Brak danych')} {self.user_data.get('lastName', 'Brak danych')}\nEmail: {self.user_data.get('email', 'Brak danych')}")
+                self.coins_label.setText(f"Coins: {self.user_data.get('coins', 'Brak danych')}")
+                self.karnet_1h_label.setText(f"Karnet_1h: {self.user_data.get('Karnet_1h', 'Brak danych')}")
+                self.karnet_4h_label.setText(f"Karnet_4h: {self.user_data.get('Karnet_4h', 'Brak danych')}")
+                self.karnet_8h_label.setText(f"Karnet_8h: {self.user_data.get('Karnet_8h', 'Brak danych')}")
+                self.karnet_open_label.setText(f"Karnet_Open: {self.user_data.get('Karnet_Open', 'Brak danych')}")
+
+                # Show confirmation dialog
+                msg_box = QMessageBox()
+                msg_box.setWindowTitle("Potwierdzenie")
+                msg_box.setText(f"Czy chcesz wykorzystać {qr_type}?")
+                msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+                msg_box.setDefaultButton(QMessageBox.No)
+                response = msg_box.exec_()
+
+                if response == QMessageBox.Yes:
+                    # Check the type and update accordingly
+                    if qr_type == "Karnet 1h":
+                        self.update_field('Karnet_1h', -1)
+                    if qr_type == "Karnet 4h":
+                        self.update_field('Karnet_4h', -1)
+                    if qr_type == "Karnet 8h":
+                        self.update_field('Karnet_8h', -1)
+                    if qr_type == "Karnet_Open":
+                        self.update_field('Karnet_Open', -1)
+            else:
+                msg = QMessageBox(self)
+                msg.setWindowTitle("Błąd")
+                msg.setText("Brak osoby o podanym tekście z kodu QR")
+                msg.exec_()
+        else:
+            print("Invalid QR Code Data")
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
