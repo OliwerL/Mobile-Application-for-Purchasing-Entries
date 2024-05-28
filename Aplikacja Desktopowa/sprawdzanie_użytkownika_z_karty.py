@@ -1,6 +1,6 @@
 import sys
 import time
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QHBoxLayout, QGridLayout, QGroupBox, QPushButton, QMessageBox, QSpacerItem, QSizePolicy
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QHBoxLayout, QGridLayout, QGroupBox, QPushButton, QMessageBox, QSlider, QDialog, QSpinBox, QDialogButtonBox
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtCore import QTimer, Qt
 from smartcard.System import readers
@@ -22,6 +22,29 @@ db = firestore.client()
 import cv2
 from pyzbar import pyzbar
 import re  # Import regex module
+
+
+class MastercoinDialog(QDialog):
+    def __init__(self, max_coins, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Wybierz liczbę Mastercoinów")
+
+        self.layout = QVBoxLayout(self)
+
+        self.label = QLabel(f"Wybierz liczbę Mastercoinów (max {max_coins}):")
+        self.layout.addWidget(self.label)
+
+        self.spin_box = QSpinBox()
+        self.spin_box.setRange(1, max_coins)
+        self.layout.addWidget(self.spin_box)
+
+        self.button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.button_box.accepted.connect(self.accept)
+        self.button_box.rejected.connect(self.reject)
+        self.layout.addWidget(self.button_box)
+
+    def get_value(self):
+        return self.spin_box.value()
 
 
 class MainWindow(QMainWindow):
@@ -321,18 +344,6 @@ class MainWindow(QMainWindow):
                 self.user_data = user_data
                 self.user_data['id'] = card_text_key
 
-                # Check the availability of the ticket
-                if (qr_type == "Karnet 1h" and self.user_data.get('Karnet_1h', 0) <= 0) or \
-                   (qr_type == "Karnet 4h" and self.user_data.get('Karnet_4h', 0) <= 0) or \
-                   (qr_type == "Karnet 8h" and self.user_data.get('Karnet_8h', 0) <= 0) or \
-                   (qr_type == "Karnet_Open" and self.user_data.get('Karnet_Open', 0) <= 0):
-                    msg = QMessageBox(self)
-                    msg.setWindowTitle("Brak wybranego karnetu")
-                    msg.setStyleSheet("background-color: red;")
-                    msg.setText("Brak wybranego karnetu")
-                    msg.exec_()
-                    return
-
                 # Update the UI
                 self.name_label.setText(
                     f"Name: {self.user_data.get('firstName', 'Brak danych')} {self.user_data.get('lastName', 'Brak danych')}\nEmail: {self.user_data.get('email', 'Brak danych')}")
@@ -342,31 +353,67 @@ class MainWindow(QMainWindow):
                 self.karnet_8h_label.setText(f"Karnet_8h: {self.user_data.get('Karnet_8h', 'Brak danych')}")
                 self.karnet_open_label.setText(f"Karnet_Open: {self.user_data.get('Karnet_Open', 'Brak danych')}")
 
-                # Show confirmation dialog
-                msg_box = QMessageBox()
-                msg_box.setWindowTitle("Potwierdzenie")
-                msg_box.setText(f"Czy chcesz wykorzystać {qr_type}?")
-                msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-                msg_box.setDefaultButton(QMessageBox.No)
-                response = msg_box.exec_()
+                # Check the availability of the ticket
+                if qr_type == "mastercoin":
+                    self.handle_mastercoin()
+                elif (qr_type == "Karnet 1h" and self.user_data.get('Karnet_1h', 0) <= 0) or \
+                     (qr_type == "Karnet 4h" and self.user_data.get('Karnet_4h', 0) <= 0) or \
+                     (qr_type == "Karnet 8h" and self.user_data.get('Karnet_8h', 0) <= 0) or \
+                     (qr_type == "Karnet_Open" and self.user_data.get('Karnet_Open', 0) <= 0):
+                    msg = QMessageBox(self)
+                    msg.setWindowTitle("Brak wybranego karnetu")
+                    msg.setStyleSheet("background-color: red;")
+                    msg.setText("Brak wybranego karnetu")
+                    msg.exec_()
+                    return
 
-                if response == QMessageBox.Yes:
-                    # Check the type and update accordingly
-                    if qr_type == "Karnet 1h":
-                        self.update_field('Karnet_1h', -1)
-                    if qr_type == "Karnet 4h":
-                        self.update_field('Karnet_4h', -1)
-                    if qr_type == "Karnet 8h":
-                        self.update_field('Karnet_8h', -1)
-                    if qr_type == "Karnet_Open":
-                        self.update_field('Karnet_Open', -1)
+                # Show confirmation dialog
+                else:
+                    msg_box = QMessageBox()
+                    msg_box.setWindowTitle("Potwierdzenie")
+                    msg_box.setText(f"Czy chcesz wykorzystać {qr_type}?")
+                    msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+                    msg_box.setDefaultButton(QMessageBox.No)
+                    response = msg_box.exec_()
+
+                    if response == QMessageBox.Yes:
+                        # Check the type and update accordingly
+                        if qr_type == "Karnet 1h":
+                            self.update_field('Karnet_1h', -1)
+                        if qr_type == "Karnet 4h":
+                            self.update_field('Karnet_4h', -1)
+                        if qr_type == "Karnet 8h":
+                            self.update_field('Karnet_8h', -1)
+                        if qr_type == "Karnet_Open":
+                            self.update_field('Karnet_Open', -1)
             else:
+                self.name_label.setText("Name: Brak danych\nEmail: Brak danych")
+                self.coins_label.setText("Coins: Brak danych")
+                self.karnet_1h_label.setText("Karnet_1h: Brak danych")
+                self.karnet_4h_label.setText("Karnet_4h: Brak danych")
+                self.karnet_8h_label.setText("Karnet_8h: Brak danych")
+                self.karnet_open_label.setText("Karnet_Open: Brak danych")
                 msg = QMessageBox(self)
                 msg.setWindowTitle("Błąd")
                 msg.setText("Brak osoby o podanym tekście z kodu QR")
                 msg.exec_()
         else:
             print("Invalid QR Code Data")
+
+    def handle_mastercoin(self):
+        max_coins = self.user_data.get('coins', 0)
+        if max_coins <= 0:
+            msg = QMessageBox(self)
+            msg.setWindowTitle("Brak Mastercoinów")
+            msg.setStyleSheet("background-color: red;")
+            msg.setText("Brak Mastercoinów")
+            msg.exec_()
+            return
+
+        dialog = MastercoinDialog(max_coins, self)
+        if dialog.exec_() == QDialog.Accepted:
+            coins_to_use = dialog.get_value()
+            self.update_field('coins', -coins_to_use)
 
 
 if __name__ == '__main__':
