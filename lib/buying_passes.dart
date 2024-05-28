@@ -23,13 +23,13 @@ class BuyingPassScreen extends StatelessWidget {
   double getPassPrice(String passName) {
     switch (passName) {
       case 'Karnet 1h':
-        return 5.00;
+        return 0.02;
       case 'Karnet 4h':
-        return 15.00;
+        return 0.02;
       case 'Karnet 8h':
-        return 25.00;
+        return 0.02;
       case 'Karnet Open':
-        return 50.00;
+        return 0.02;
       default:
         return 0.00;
     }

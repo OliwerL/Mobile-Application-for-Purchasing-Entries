@@ -13,7 +13,7 @@ class BuyingCoinsScreen extends StatelessWidget {
     _paymentItems.add(
       PaymentItem(
         label: 'MasterCoins',
-        amount: (coinAmount * 1.99).toString(), // Set your coin price here
+        amount: (coinAmount * 0.02).toString(), // Set your coin price here
         status: PaymentItemStatus.final_price,
       ),
     );
