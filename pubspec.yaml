@@ -47,6 +47,7 @@ dependencies:
   nfc_emulator: ^2.0.0-nullsafety.0
   provider: ^6.0.0
   geocoding: ^3.0.0
+  pay: ^2.0.0
 
 dev_dependencies:
   flutter_test:

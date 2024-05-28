@@ -45,13 +45,13 @@ class TicketsPurchaseScreen extends StatelessWidget {
                   padding: EdgeInsets.all(screenWidth * 0.05),
                   children: <Widget>[
                     _createButton(
-                        context, '1 MasterCoin', const BuyingCoinsScreen(coinAmount: 1)),
+                        context, '1 MasterCoin',  BuyingCoinsScreen(coinAmount: 1)),
                     _createButton(
-                        context, '4 MasterCoin', const BuyingCoinsScreen(coinAmount: 4)),
+                        context, '4 MasterCoin',  BuyingCoinsScreen(coinAmount: 4)),
                     _createButton(
-                        context, '8 MasterCoin', const BuyingCoinsScreen(coinAmount: 8)),
+                        context, '8 MasterCoin',  BuyingCoinsScreen(coinAmount: 8)),
                     _createButton(
-                        context, '16 MasterCoin', const BuyingCoinsScreen(coinAmount: 16)),
+                        context, '16 MasterCoin',  BuyingCoinsScreen(coinAmount: 16)),
                   ],
                 ),
 

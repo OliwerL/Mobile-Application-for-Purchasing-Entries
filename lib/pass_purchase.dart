@@ -46,13 +46,13 @@ class PassPurchaseScreen extends StatelessWidget {
                   padding: EdgeInsets.all(screenWidth * 0.05),
                   children: <Widget>[
                     _createButton(
-                        context, '1h zajęć', const BuyingPassScreen(passName: "Karnet 1h")),
+                        context, '1h zajęć',  BuyingPassScreen(passName: "Karnet 1h")),
                     _createButton(
-                        context, 'Karnet 4h', const BuyingPassScreen(passName: "Karnet 4h")),
+                        context, 'Karnet 4h',  BuyingPassScreen(passName: "Karnet 4h")),
                     _createButton(
-                        context, 'Karnet 8h', const BuyingPassScreen(passName: "Karnet 8h")),
+                        context, 'Karnet 8h',  BuyingPassScreen(passName: "Karnet 8h")),
                     _createButton(
-                        context, 'Karnet Open', const BuyingPassScreen(passName: "Karnet Open")),
+                        context, 'Karnet Open',  BuyingPassScreen(passName: "Karnet Open")),
                   ],
                 ),
                 const SizedBox(height: 20),

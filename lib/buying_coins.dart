@@ -1,12 +1,23 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:pay/pay.dart';
 import 'coin_data.dart';
+import 'payment_configurations.dart';
 
 class BuyingCoinsScreen extends StatelessWidget {
   final int coinAmount;
+  final List<PaymentItem> _paymentItems = [];
 
-  const BuyingCoinsScreen({Key? key, required this.coinAmount}) : super(key: key);
+  BuyingCoinsScreen({Key? key, required this.coinAmount}) : super(key: key) {
+    _paymentItems.add(
+      PaymentItem(
+        label: 'MasterCoins',
+        amount: (coinAmount * 1.99).toString(), // Set your coin price here
+        status: PaymentItemStatus.final_price,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,36 +67,31 @@ class BuyingCoinsScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 40),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red[900], // Button color
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  onPressed: () async {
-                    await Provider.of<CoinData>(context, listen: false).addCoins(coinAmount);
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text("Informacja"),
-                          content: const Text("Zakup zakończony pomyślnie!"),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(); // Close the dialog
-                              },
-                              child: const Text('OK'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
+                GooglePayButton(
+                  paymentConfiguration: PaymentConfiguration.fromJsonString(
+                      defaultGooglePay),
+                  paymentItems: _paymentItems,
+                  type: GooglePayButtonType.buy,
+                  margin: const EdgeInsets.only(top: 15.0),
+                  onPaymentResult: (data) {
+                    _handlePaymentSuccess(context);
                   },
-                  child: const Text(
-                    'Kup MasterCoin',
-                    style: TextStyle(color: Colors.white),
+                  loadingIndicator: const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                ApplePayButton(
+                  paymentConfiguration: PaymentConfiguration.fromJsonString(
+                      defaultApplePay),
+                  paymentItems: _paymentItems,
+                  style: ApplePayButtonStyle.black,
+                  type: ApplePayButtonType.buy,
+                  margin: const EdgeInsets.only(top: 15.0),
+                  onPaymentResult: (data) {
+                    _handlePaymentSuccess(context);
+                  },
+                  loadingIndicator: const Center(
+                    child: CircularProgressIndicator(),
                   ),
                 ),
               ],
@@ -93,6 +99,26 @@ class BuyingCoinsScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+  void _handlePaymentSuccess(BuildContext context) async {
+    await Provider.of<CoinData>(context, listen: false).addCoins(coinAmount);
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Informacja"),
+          content: const Text("Zakup zakończony pomyślnie!"),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -3,16 +3,40 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pay/pay.dart';
+import 'payment_configurations.dart';
 
 class BuyingPassScreen extends StatelessWidget {
-  final String passName; // Variable to store the integer value
+  final String passName;
+  final List<PaymentItem> _paymentItems = [];
 
-  // Constructor with an integer parameter
-  const BuyingPassScreen({Key? key, required this.passName}) : super(key: key);
+  BuyingPassScreen({Key? key, required this.passName}) : super(key: key) {
+    _paymentItems.add(
+      PaymentItem(
+        label: passName,
+        amount: getPassPrice(passName).toStringAsFixed(2),
+        status: PaymentItemStatus.final_price,
+      ),
+    );
+  }
 
-  Future<void> _buyPass(BuildContext context) async {
+  double getPassPrice(String passName) {
+    switch (passName) {
+      case 'Karnet 1h':
+        return 5.00;
+      case 'Karnet 4h':
+        return 15.00;
+      case 'Karnet 8h':
+        return 25.00;
+      case 'Karnet Open':
+        return 50.00;
+      default:
+        return 0.00;
+    }
+  }
+
+  Future<void> _handlePaymentSuccess(BuildContext context) async {
     try {
-      // Update Firestore with the purchased pass
       String? userid = FirebaseAuth.instance.currentUser?.uid;
       if (passName == 'Karnet 1h') {
         await FirebaseFirestore.instance.collection('users').doc(userid).update({'Karnet_1h': 1});
@@ -21,8 +45,7 @@ class BuyingPassScreen extends StatelessWidget {
         await FirebaseFirestore.instance.collection('users').doc(userid).update({'Karnet_4h': 4});
       }
       else if (passName == 'Karnet 8h') {
-        await FirebaseFirestore.instance.collection('users').doc(userid).update(
-            {'Karnet_8h': 8});
+        await FirebaseFirestore.instance.collection('users').doc(userid).update({'Karnet_8h': 8});
       }
       else if (passName == 'Karnet Open') {
         await FirebaseFirestore.instance.collection('users').doc(userid).update({'Karnet_Open': 1});
@@ -30,7 +53,7 @@ class BuyingPassScreen extends StatelessWidget {
       await FirebaseFirestore.instance
           .collection('users')
           .doc(userid) // Replace with actual user ID
-          .update({passName: 1});
+          .update({passName.replaceAll(' ', '_'): 1});
 
       // Show success dialog
       showDialog(
@@ -114,19 +137,31 @@ class BuyingPassScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 40),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red[900], // Button color
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  onPressed: () {
-                    _buyPass(context);
+                GooglePayButton(
+                  paymentConfiguration: PaymentConfiguration.fromJsonString(
+                      defaultGooglePay),
+                  paymentItems: _paymentItems,
+                  type: GooglePayButtonType.buy,
+                  margin: const EdgeInsets.only(top: 15.0),
+                  onPaymentResult: (data) {
+                    _handlePaymentSuccess(context);
                   },
-                  child: const Text(
-                    'Kup karnet',
-                    style: TextStyle(color: Colors.white),
+                  loadingIndicator: const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                ApplePayButton(
+                  paymentConfiguration: PaymentConfiguration.fromJsonString(
+                      defaultApplePay),
+                  paymentItems: _paymentItems,
+                  style: ApplePayButtonStyle.black,
+                  type: ApplePayButtonType.buy,
+                  margin: const EdgeInsets.only(top: 15.0),
+                  onPaymentResult: (data) {
+                    _handlePaymentSuccess(context);
+                  },
+                  loadingIndicator: const Center(
+                    child: CircularProgressIndicator(),
                   ),
                 ),
               ],
