@@ -56,14 +56,15 @@ class BuyingCoinsScreen extends StatelessWidget {
                         color: Colors.white)),
                 const SizedBox(height: 20),
                 Container(
-                  padding: EdgeInsets.all(15.0),
+                  padding: EdgeInsets.all(25.0),
                   child: const Text(
-                    'DOpis co to są MasterCoins pewnie będzie dłuższy więc napisze jakieś głupoty żeby bardziej oddawało wizualnie. Litwo ojczyzno moja ty jesteś jak zdrowie ile cie trzeba cenić ten tylko sie dowie kto cie stracił',
+                    'MasterCoin umożliwiają wejście na kryty skatepark MasterHouse zlokalizowany w Olsztynie przy ulicy Sokolej 6c. Jeden MasterCoin umożliwia wejście na 1 godzinę jazdy swobodnej na skateparku. W przypadku chęci dłuższego pozostania na obiekcie użytkownik zobowiązany jest do wymiany liczby MasterCoin odpowiadającej liczbie godzin spędzonych na skateparku.',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
+                    textAlign: TextAlign.justify,
                   ),
                 ),
                 const SizedBox(height: 40),

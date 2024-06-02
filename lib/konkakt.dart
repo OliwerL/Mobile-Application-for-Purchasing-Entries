@@ -43,7 +43,7 @@ class ContactScreen extends StatelessWidget {
               if (snapshot.connectionState == ConnectionState.active) {
                 if (snapshot.hasData) {
                   return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
                       const SizedBox(height: 20),
                       // Contact Information Section
@@ -52,7 +52,7 @@ class ContactScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               "Kontakt:",
                               style: TextStyle(
                                 fontSize: 16,
@@ -60,14 +60,14 @@ class ContactScreen extends StatelessWidget {
                                 color: Colors.white,
                               ),
                             ),
-                            Text(
+                            const Text(
                               "(+48) 451 008 758",
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.white,
                               ),
                             ),
-                            Text(
+                            const Text(
                               "rollmasters.olsztyn@gmail.com",
                               style: TextStyle(
                                 fontSize: 14,
@@ -75,7 +75,7 @@ class ContactScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 10),
-                            Text(
+                            const Text(
                               "Media społecznościowe:",
                               style: TextStyle(
                                 fontSize: 16,

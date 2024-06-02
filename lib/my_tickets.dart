@@ -61,7 +61,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
                           );
                         },
                         child: Text(
-                          'Moje mastercoin: ${coinData.myMastercoin}',
+                          'Moje MasterCoin: ${coinData.myMastercoin}',
                           style: const TextStyle(
                             fontSize: 25,
                             fontWeight: FontWeight.bold,
@@ -106,7 +106,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
                               );
                             },
                             child: Text(
-                              'Pokaż QR: ${coinData.purchasedTickets[index]}',
+                              'Wejście: ${coinData.purchasedTickets[index]}',
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.white,

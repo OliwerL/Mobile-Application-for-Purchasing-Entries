@@ -99,6 +99,19 @@ class BuyingPassScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+    String description;
+    switch (passName) {
+      case 'Karnet 1h':
+        description = '1 godzina dowolnych zajęć\n + 1h swobodnej jazdy na Skateparku MasterHouse';
+      case 'Karnet 4h':
+        description = 'Motywacja i oszczędność 50zł\n + 2h swobodnej jazdy na Skateparku MasterHouse';
+      case 'Karnet 8h':
+        description = 'Motywacja i oszczędność 150zł\n + 4h swobodnej jazdy na Skateparku MasterHouse';
+      case 'Karnet Open':
+        description = 'Progres i swoboda wyboru\n + 8h swobodnej jazdy na Skateparku MasterHouse';
+      default:
+        description = passName;
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(passName),
@@ -128,12 +141,13 @@ class BuyingPassScreen extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.all(15.0),
                   child: Text(
-                    passName,
+                    '$passName:\n $description',
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
                 const SizedBox(height: 40),

@@ -127,7 +127,7 @@ class _NfcSendExampleState extends State<NfcSendExample> {
               ],
             ),
             child: const Text(
-              'Przyłóż urządzenie do karty.',
+              'Jeśli jesteś nowym użytkownikiem przyłóź urządzenie do karty, aby stworzyć swoją MasterCard',
               textAlign: TextAlign.center, // Centers the text inside the container
               style: TextStyle(
                 fontSize: 18, // Font size

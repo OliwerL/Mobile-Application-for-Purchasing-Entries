@@ -43,21 +43,33 @@ class _MainScreenState extends State<MainScreen> {
         backgroundColor: Colors.grey[350],
         onTap: onTabTapped,
         currentIndex: _currentIndex,
-        selectedItemColor: Colors.red[900], // Optional: set selected item color
-        unselectedItemColor: Colors.black, // Optional: set unselected item color
-        selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold), // Bold text for selected item
+        selectedItemColor: Colors.red[900],
+        // Optional: set selected item color
+        unselectedItemColor: Colors.black,
+        // Optional: set unselected item color
+        selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
+        // Bold text for selected item
         unselectedLabelStyle: TextStyle(fontWeight: FontWeight.normal),
         items: [
           const BottomNavigationBarItem(
-            icon: Icon(Icons.home, color: Colors.black,),
+            icon: Icon(
+              Icons.home,
+              color: Colors.black,
+            ),
             label: 'Oferta',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.confirmation_num, color: Colors.red[900],),
+            icon: Icon(
+              Icons.confirmation_num,
+              color: Colors.red[900],
+            ),
             label: 'Karnety',
           ),
           const BottomNavigationBarItem(
-            icon: Icon(Icons.menu, color: Colors.black,),
+            icon: Icon(
+              Icons.menu,
+              color: Colors.black,
+            ),
             label: 'Opcje',
           ),
           // Add more BottomNavigationBarItem as needed
@@ -74,100 +86,112 @@ class HelloScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width; // Gets the screen width
-    double screenHeight = MediaQuery.of(context).size.height - 45;
+    double screenWidth =
+        MediaQuery.of(context).size.width; // Gets the screen width
+    double screenHeight = MediaQuery.of(context).size.height;
     // Return your screen content without a Scaffold
     return Container(
       decoration: const BoxDecoration(
         image: DecorationImage(
           image: AssetImage("assets/background.png"),
-          // replace with your image path
           fit: BoxFit.fitWidth,
-          // This will scale the image to fit the width of the screen
-          repeat: ImageRepeat.repeatY, // This will repeat the image vertically
+          repeat: ImageRepeat.repeatY,
         ),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          SizedBox(height: screenHeight/ 10),
-          Center( // This centers the button container in its parent
-            child: SizedBox(
-              width: screenWidth / 1.3,
-              // Makes the button's width 1/3 of the screen's width
-              height: screenHeight / 4,
-              child: MaterialButton(
-                color: Colors.red[900],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20), // zaokrąglone rogi o promieniu 20
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(height: 3* screenHeight / 40),
+            Center(
+              // This centers the button container in its parent
+              child: SizedBox(
+                width: screenWidth / 1.3,
+                // Makes the button's width 1/3 of the screen's width
+                height: screenHeight / 4,
+                child: MaterialButton(
+                  color: Colors.red[900],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                        20), // zaokrąglone rogi o promieniu 20
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const TicketsPurchaseScreen()),
+                    );
+                  },
+                  child: const Text('Wejścia na skatepark',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          // Increase the font size
+                          fontWeight: FontWeight.bold)),
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const TicketsPurchaseScreen()),
-                  );
-                },
-                child: const Text('Wejścia na skatepark',
-                    style: TextStyle(color: Colors.white,fontSize: 20,  // Increase the font size
-                      fontWeight: FontWeight.bold)),
               ),
             ),
-          ),
-          SizedBox(height: screenHeight/ 40),
-          Center( // This centers the button container in its parent
-            child: SizedBox(
-              width: screenWidth / 1.3,
-              // Makes the button's width 1/3 of the screen's width
-              height: screenHeight / 4,
-              child: MaterialButton(
-                color: Colors.red[900],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20), // zaokrąglone rogi o promieniu 20
+            SizedBox(height: screenHeight / 40),
+            Center(
+              // This centers the button container in its parent
+              child: SizedBox(
+                width: screenWidth / 1.3,
+                // Makes the button's width 1/3 of the screen's width
+                height: screenHeight / 4,
+                child: MaterialButton(
+                  color: Colors.red[900],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                        20), // zaokrąglone rogi o promieniu 20
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const PassPurchaseScreen()),
+                    );
+                  },
+                  child: const Text('Karnety na zajęcia',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          // Increase the font size
+                          fontWeight: FontWeight.bold)),
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const PassPurchaseScreen()),
-                  );
-                },
-                child: const Text('Karnety na zajęcia',
-                    style: TextStyle(color: Colors.white, fontSize: 20,  // Increase the font size
-                      fontWeight: FontWeight.bold)),
               ),
             ),
-          ),
-          SizedBox(height: screenHeight/ 40),
-          Center( // This centers the button container in its parent
-            child: SizedBox(
-              width: screenWidth / 1.3,
-              // Makes the button's width 1/3 of the screen's width
-              height: screenHeight / 4,
-              child: MaterialButton(
-                color: Colors.red[900],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20), // zaokrąglone rogi o promieniu 20
+            SizedBox(height: screenHeight / 40),
+            Center(
+              // This centers the button container in its parent
+              child: SizedBox(
+                width: screenWidth / 1.3,
+                // Makes the button's width 1/3 of the screen's width
+                height: screenHeight / 4,
+                child: MaterialButton(
+                  color: Colors.red[900],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                        20), // zaokrąglone rogi o promieniu 20
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => NfcSendExample()),
+                    );
+                  },
+                  child: const Text('RollMaster Card',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          // Increase the font size
+                          fontWeight: FontWeight.bold)),
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => NfcSendExample()),
-                  );
-                },
-                child: const Text(
-                    'RollMaster Card', style: TextStyle(color: Colors.white, fontSize: 20,  // Increase the font size
-                  fontWeight: FontWeight.bold)),
-
               ),
             ),
-          ),
-      SizedBox(height: screenHeight / 40),
-      ],
+            SizedBox(height: 2*screenHeight / 40),
+          ],
+        ),
       ),
     );
   }
 }
-
-
