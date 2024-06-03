@@ -1,10 +1,10 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mhapp/konkakt.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mhapp/zmiana_danych.dart';
 import 'logowanie.dart';
+import 'package:logger/logger.dart';
 
 class MoreOptionsScreen extends StatelessWidget {
   @override
@@ -153,35 +153,83 @@ void _showDeleteAccountDialog(BuildContext context) {
   );
 }
 
-void _deleteAccount(BuildContext context) async {
-  User? user = FirebaseAuth.instance.currentUser;
+Future<void> _reauthenticateAndDelete(BuildContext context) async {
+  final Logger log = Logger();
+  try {
+    final providerData = FirebaseAuth.instance.currentUser?.providerData.first;
 
-  if (user != null) {
-    try {
-      await user.delete();
+    log.d('Re-authenticating with provider: ${providerData?.providerId}');
+
+    if (providerData != null) {
+      if (AppleAuthProvider().providerId == providerData.providerId) {
+        log.d('Using AppleAuthProvider for re-authentication');
+        await FirebaseAuth.instance.currentUser!
+            .reauthenticateWithProvider(AppleAuthProvider());
+      } else if (GoogleAuthProvider().providerId == providerData.providerId) {
+        log.d('Using GoogleAuthProvider for re-authentication');
+        await FirebaseAuth.instance.currentUser!
+            .reauthenticateWithProvider(GoogleAuthProvider());
+      } else {
+        log.e('Unsupported provider: ${providerData.providerId}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Nieobsługiwany dostawca logowania: ${providerData.providerId}')),
+        );
+        return;
+      }
+
+      log.d('Re-authentication successful, attempting to delete user again');
+      await FirebaseAuth.instance.currentUser?.delete();
+
+      if (!context.mounted) return;
+      log.d('User deletion successful, logging out and navigating to LoginScreen');
+      await FirebaseAuth.instance.signOut();
       Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (context) => LoginScreen(),
       ));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Twoje konto zostało pomyślnie usunięte.')),
-      );
+    }
+  } catch (e) {
+    log.e('Error during re-authentication and deletion: $e');
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Wystąpił błąd podczas ponownej autoryzacji: ${e.toString()}')),
+    );
+  }
+}
+
+Future<void> _deleteAccount(BuildContext context) async {
+  User? user = FirebaseAuth.instance.currentUser;
+  final Logger log = Logger();
+
+  if (user != null) {
+    try {
+      log.d('Attempting to delete user: ${user.uid}');
+      await user.delete();
+      log.d('User deletion attempt finished');
+
+      if (!context.mounted) return;
+      log.d('Logging out and navigating to LoginScreen after deletion');
+      await FirebaseAuth.instance.signOut();
+
+      if (!context.mounted) return;
+      log.d('Navigating to LoginScreen');
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+        builder: (context) => LoginScreen(),
+      ));
     } on FirebaseAuthException catch (e) {
+      log.e('FirebaseAuthException during account deletion: ${e.code}');
       if (e.code == 'requires-recent-login') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Do usunięcia konta wymagana jest ponowna autoryzacja. Zaloguj się ponownie i spróbuj ponownie.'),
-          ),
-        );
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => LoginScreen(),
-        ));
+        log.d('Re-authentication required, attempting re-authentication');
+        await _reauthenticateAndDelete(context);
       } else {
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Wystąpił błąd podczas usuwania konta: ${e.message}')),
         );
       }
     }
   } else {
+    log.e('No user found to delete');
+    if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Nie udało się uzyskać informacji o użytkowniku.')),
     );
