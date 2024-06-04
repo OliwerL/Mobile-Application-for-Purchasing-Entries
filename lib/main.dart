@@ -49,14 +49,26 @@ class MyApp extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.active) {
             User? user = snapshot.data;
-            if (user == null) {
-              return const LoginScreen(); // Użytkownik nie jest zalogowany, pokazuje ekran logowania
+            String? userId = FirebaseAuth.instance.currentUser?.uid;
+            final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+            if (user != null && userId != null) {
+              // Sprawdź, czy użytkownik jest zalogowany i czy pole 'emailver' jest ustawione na true
+              //DatabaseService().getDocument(userId!).then((documentSnapshot) {
+                //bool islogged = documentSnapshot.get('logger') ?? false;
+                if (FirebaseAuth.instance.currentUser != null) {
+                  return MainScreen(); // Przekieruj do ekranu głównego, jeśli email jest zweryfikowany
+                } else {
+                  return const LoginScreen(); // Pokaż ekran logowania, jeśli email nie jest zweryfikowany
+                };
+              //}
+             // );
+            } else {
+              return const LoginScreen(); // Użytkownik nie jest zalogowany, pokaż ekran logowania
             }
-            return MainScreen(); // Użytkownik jest zalogowany, pokazuje inny ekran
           }
           return const Scaffold(
             body: Center(
-              child: CircularProgressIndicator(), // Ekran ładowania podczas oczekiwania na dane autentykacji
+              child: CircularProgressIndicator(),
             ),
           );
         },
@@ -64,6 +76,7 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
 
 
 

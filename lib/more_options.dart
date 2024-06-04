@@ -88,6 +88,8 @@ void onSelected(BuildContext context, int item) async {
       await launchUrl(url);
       break;
     case 2:
+      String? userid = FirebaseAuth.instance.currentUser?.uid;
+      await FirebaseFirestore.instance.collection('users').doc(userid).update({'logger': false});
       await FirebaseAuth.instance.signOut();
       Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (context) => LoginScreen(),

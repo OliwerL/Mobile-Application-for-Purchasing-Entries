@@ -249,6 +249,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             'Karnet_4h':0,
             'Karnet_8h':0,
             'Karnet_Open':0,
+            'logger': false,
           });
 
           ScaffoldMessenger.of(context).showSnackBar(
