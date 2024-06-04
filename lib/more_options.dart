@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mhapp/konkakt.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -5,7 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mhapp/zmiana_danych.dart';
 import 'logowanie.dart';
 import 'package:logger/logger.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MoreOptionsScreen extends StatelessWidget {
   @override
@@ -129,6 +129,8 @@ void navigateToAccountSettings(BuildContext context) {
   }
 }
 
+final FirebaseFirestore _db = FirebaseFirestore.instance;
+
 void _showDeleteAccountDialog(BuildContext context) {
   showDialog(
     context: context,
@@ -147,7 +149,7 @@ void _showDeleteAccountDialog(BuildContext context) {
             child: Text('Usuń', style: TextStyle(color: Colors.red)),
             onPressed: () async {
               Navigator.of(context).pop();
-              deleteUserAccount();
+              await deleteUserAccount(context);
               Navigator.of(context).pushReplacement(MaterialPageRoute(
                 builder: (context) => LoginScreen(),
               ));
@@ -159,12 +161,13 @@ void _showDeleteAccountDialog(BuildContext context) {
   );
 }
 
-final FirebaseFirestore _db = FirebaseFirestore.instance;
-
-Future<void> deleteUserAccount() async {
+Future<void> deleteUserAccount(BuildContext context) async {
   final Logger log = Logger();
   try {
     final userId = FirebaseAuth.instance.currentUser!.uid;
+
+    // Re-authenticate user
+    await _reauthenticateAndDelete(context);
 
     // Delete Firestore data
     await _deleteUserData(userId);
@@ -175,18 +178,9 @@ Future<void> deleteUserAccount() async {
     await FirebaseAuth.instance.currentUser!.delete();
     log.d('User deleted from Firebase Authentication');
 
-  } on FirebaseAuthException catch (e) {
-    log.e(e);
-
-    if (e.code == "requires-recent-login") {
-      await _reauthenticateAndDelete();
-    } else {
-      // Handle other Firebase exceptions
-    }
   } catch (e) {
     log.e(e);
-
-    // Handle general exception
+    // Handle exceptions
   }
 }
 
@@ -204,23 +198,66 @@ Future<void> _deleteUserData(String userId) async {
   }
 }
 
-Future<void> _reauthenticateAndDelete() async {
+Future<void> _reauthenticateAndDelete(BuildContext context) async {
   final Logger log = Logger();
   try {
-    final providerData = FirebaseAuth.instance.currentUser?.providerData.first;
-
-    if (AppleAuthProvider().providerId == providerData!.providerId) {
-      await FirebaseAuth.instance.currentUser!
-          .reauthenticateWithProvider(AppleAuthProvider());
-    } else if (GoogleAuthProvider().providerId == providerData.providerId) {
-      await FirebaseAuth.instance.currentUser!
-          .reauthenticateWithProvider(GoogleAuthProvider());
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final password = await _showPasswordInputDialog(context);
+      if (password != null && password.isNotEmpty) {
+        final credential = EmailAuthProvider.credential(
+          email: user.email!,
+          password: password,
+        );
+        await user.reauthenticateWithCredential(credential);
+        log.d('User reauthenticated');
+      } else {
+        log.e('Password not provided');
+        throw FirebaseAuthException(
+          code: 'password-not-provided',
+          message: 'Password is required for re-authentication',
+        );
+      }
+    } else {
+      log.e('No user is currently signed in');
+      throw FirebaseAuthException(
+        code: 'no-user',
+        message: 'No user is currently signed in',
+      );
     }
-
-    await FirebaseAuth.instance.currentUser?.delete();
-    log.d('User reauthenticated and deleted');
   } catch (e) {
     log.e(e);
     // Handle exceptions
   }
+}
+
+Future<String?> _showPasswordInputDialog(BuildContext context) async {
+  TextEditingController passwordController = TextEditingController();
+  return showDialog<String>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Wymagane jest ponowne podanie hasłą'),
+        content: TextField(
+          controller: passwordController,
+          obscureText: true,
+          decoration: InputDecoration(hintText: 'Password'),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: Text('Cancel'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: Text('Submit'),
+            onPressed: () {
+              Navigator.of(context).pop(passwordController.text);
+            },
+          ),
+        ],
+      );
+    },
+  );
 }

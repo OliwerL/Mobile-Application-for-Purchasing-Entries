@@ -19,7 +19,7 @@ class QRcodeScreen extends StatelessWidget {
         return 'Karnet_8h';
       case 'Karnet Open':
         return 'Karnet_Open';
-      case 'castercoin':
+      case 'mastercoin':
         return 'coins';
       default:
         return '';
