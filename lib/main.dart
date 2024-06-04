@@ -25,11 +25,11 @@ class DatabaseService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   Future<DocumentSnapshot> getDocument(String docId) async {
-    return await _db.collection('Test1').doc(docId).get();
+    return await _db.collection('users').doc(docId).get();
   }
 
   Stream<QuerySnapshot> streamDocuments() {
-    return _db.collection('Test1').snapshots();
+    return _db.collection('users').snapshots();
   }
 }
 
@@ -49,13 +49,14 @@ class MyApp extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.active) {
             User? user = snapshot.data;
+            User? user2 = FirebaseAuth.instance.currentUser;
             String? userId = FirebaseAuth.instance.currentUser?.uid;
             final FirebaseFirestore _firestore = FirebaseFirestore.instance;
             if (user != null && userId != null) {
               // Sprawdź, czy użytkownik jest zalogowany i czy pole 'emailver' jest ustawione na true
               //DatabaseService().getDocument(userId!).then((documentSnapshot) {
                 //bool islogged = documentSnapshot.get('logger') ?? false;
-                if (FirebaseAuth.instance.currentUser != null) {
+                if (user2 != null && user2.emailVerified == true) {
                   return MainScreen(); // Przekieruj do ekranu głównego, jeśli email jest zweryfikowany
                 } else {
                   return const LoginScreen(); // Pokaż ekran logowania, jeśli email nie jest zweryfikowany
