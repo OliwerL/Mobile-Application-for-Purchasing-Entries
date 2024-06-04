@@ -17,14 +17,16 @@ class BuyingPassScreen extends StatefulWidget {
 
 class _BuyingPassScreenState extends State<BuyingPassScreen> {
   final List<PaymentItem> _paymentItems = [];
+  late double passPrice;
 
   @override
   void initState() {
     super.initState();
+    passPrice = getPassPrice(widget.passName);
     _paymentItems.add(
       PaymentItem(
         label: widget.passName,
-        amount: getPassPrice(widget.passName).toStringAsFixed(2),
+        amount: passPrice.toStringAsFixed(2),
         status: PaymentItemStatus.final_price,
       ),
     );
@@ -203,6 +205,16 @@ class _BuyingPassScreenState extends State<BuyingPassScreen> {
                           ),
                           textAlign: TextAlign.center,
                         ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        'Cena: ${passPrice.toStringAsFixed(2)} PLN',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 40),
                       if (!passOwned) ...[

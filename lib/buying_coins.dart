@@ -22,6 +22,7 @@ class BuyingCoinsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
+    double totalPrice = coinAmount * 0.02;
     return Scaffold(
       appBar: AppBar(
         title: const Text("MasterCoins"),
@@ -49,13 +50,13 @@ class BuyingCoinsScreen extends StatelessWidget {
                         color: Colors.white)),
                 const SizedBox(height: 20),
                 Text('Ilość MasterCoins do kupienia: $coinAmount',
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.white)),
                 const SizedBox(height: 20),
                 Container(
-                  padding: EdgeInsets.all(25.0),
+                  padding: const EdgeInsets.all(25.0),
                   child: const Text(
                     'MasterCoin umożliwiają wejście na kryty skatepark MasterHouse zlokalizowany w Olsztynie przy ulicy Sokolej 6c. Jeden MasterCoin umożliwia wejście na 1 godzinę jazdy swobodnej na skateparku. W przypadku chęci dłuższego pozostania na obiekcie użytkownik zobowiązany jest do wymiany liczby MasterCoin odpowiadającej liczbie godzin spędzonych na skateparku.',
                     style: TextStyle(
@@ -67,6 +68,16 @@ class BuyingCoinsScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 40),
+                Text(
+                  'Cena: ${totalPrice.toStringAsFixed(2)} PLN',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
                 GooglePayButton(
                   paymentConfiguration: PaymentConfiguration.fromJsonString(
                       defaultGooglePay),
@@ -101,6 +112,7 @@ class BuyingCoinsScreen extends StatelessWidget {
       ),
     );
   }
+
   void _handlePaymentSuccess(BuildContext context) async {
     await Provider.of<CoinData>(context, listen: false).addCoins(coinAmount);
     showDialog(
