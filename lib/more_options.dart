@@ -145,6 +145,10 @@ void _showDeleteAccountDialog(BuildContext context) {
             onPressed: () {
               Navigator.of(context).pop();
               _deleteAccount(context);
+              Navigator.of(context).pushReplacement(MaterialPageRoute(
+                builder: (context) => LoginScreen(),
+              ));
+
             },
           ),
         ],
@@ -180,7 +184,6 @@ Future<void> _reauthenticateAndDelete(BuildContext context) async {
       log.d('Re-authentication successful, attempting to delete user again');
       await FirebaseAuth.instance.currentUser?.delete();
 
-      if (!context.mounted) return;
       log.d('User deletion successful, logging out and navigating to LoginScreen');
       await FirebaseAuth.instance.signOut();
       Navigator.of(context).pushReplacement(MaterialPageRoute(
@@ -189,7 +192,6 @@ Future<void> _reauthenticateAndDelete(BuildContext context) async {
     }
   } catch (e) {
     log.e('Error during re-authentication and deletion: $e');
-    if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Wystąpił błąd podczas ponownej autoryzacji: ${e.toString()}')),
     );
@@ -205,23 +207,17 @@ Future<void> _deleteAccount(BuildContext context) async {
       log.d('Attempting to delete user: ${user.uid}');
       await user.delete();
       log.d('User deletion attempt finished');
-
-      if (!context.mounted) return;
-      log.d('Logging out and navigating to LoginScreen after deletion');
-      await FirebaseAuth.instance.signOut();
-
-      if (!context.mounted) return;
-      log.d('Navigating to LoginScreen');
+      log.d('Navigating to LoginScreen after deletion');
       Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (context) => LoginScreen(),
       ));
+      await FirebaseAuth.instance.signOut();
     } on FirebaseAuthException catch (e) {
       log.e('FirebaseAuthException during account deletion: ${e.code}');
       if (e.code == 'requires-recent-login') {
         log.d('Re-authentication required, attempting re-authentication');
         await _reauthenticateAndDelete(context);
       } else {
-        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Wystąpił błąd podczas usuwania konta: ${e.message}')),
         );
@@ -229,7 +225,6 @@ Future<void> _deleteAccount(BuildContext context) async {
     }
   } else {
     log.e('No user found to delete');
-    if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Nie udało się uzyskać informacji o użytkowniku.')),
     );
