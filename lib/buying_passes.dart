@@ -103,33 +103,68 @@ class _BuyingPassScreenState extends State<BuyingPassScreen> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text("Informacja"),
-            content: const Text("Zakup zakończony pomyślnie!"),
+            backgroundColor: Colors.red[900], // Set the background color to match the app bar
+            title: const Text(
+              "Informacja",
+              style: TextStyle(
+                color: Colors.white, // Set the text color to white
+                fontWeight: FontWeight.bold, // Make the text bold
+              ),
+            ),
+            content: const Text(
+              "Zakup zakończony pomyślnie!",
+              style: TextStyle(
+                color: Colors.white, // Set the text color to white
+              ),
+            ),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop(); // Close the dialog
                 },
-                child: const Text('OK'),
+                child: const Text(
+                  'OK',
+                  style: TextStyle(
+                    color: Colors.white, // Set the text color to white
+                    fontWeight: FontWeight.bold, // Make the text bold
+                  ),
+                ),
               ),
             ],
           );
         },
       );
     } catch (e) {
-      // Show error dialog
       await showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text("Błąd"),
-            content: const Text("Wystąpił błąd podczas zakupu."),
+            backgroundColor: Colors.red[900], // Set the background color to match the app bar
+            title: const Text(
+              "Błąd",
+              style: TextStyle(
+                color: Colors.white, // Set the text color to white
+                fontWeight: FontWeight.bold, // Make the text bold
+              ),
+            ),
+            content: const Text(
+              "Wystąpił błąd podczas zakupu.",
+              style: TextStyle(
+                color: Colors.white, // Set the text color to white
+              ),
+            ),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop(); // Close the dialog
                 },
-                child: const Text('OK'),
+                child: const Text(
+                  'OK',
+                  style: TextStyle(
+                    color: Colors.white, // Set the text color to white
+                    fontWeight: FontWeight.bold, // Make the text bold
+                  ),
+                ),
               ),
             ],
           );
