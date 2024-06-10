@@ -2,18 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:nfc_manager/nfc_manager.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-
 class NfcSendExample extends StatefulWidget {
   @override
   _NfcSendExampleState createState() => _NfcSendExampleState();
 }
 
-
 class _NfcSendExampleState extends State<NfcSendExample> {
-
-
   String _message = 'Poprawnie przesłano';
-  String? _userId; // Dodaj zmienną do przechowywania userId
+  String? _userId;
 
   @override
   void initState() {
@@ -22,7 +18,7 @@ class _NfcSendExampleState extends State<NfcSendExample> {
       if (user != null) {
         setState(() {
           _userId = user.uid;
-          _message = _userId!; // Uaktualnij _message gdy użytkownik się zmienia
+          _message = _userId!;
         });
       }
     });
@@ -32,8 +28,8 @@ class _NfcSendExampleState extends State<NfcSendExample> {
   void _fetchUserId() {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      _userId = user.uid; // Przypisz userId do zmiennej
-      _message = _userId!; // Ustaw _message na userId
+      _userId = user.uid;
+      _message = _userId!;
       _message = "RollMaster Card";
     }
   }
@@ -60,8 +56,7 @@ class _NfcSendExampleState extends State<NfcSendExample> {
       },
       onError: (e) async {
         print('Error starting NFC session: $e');
-        _showDialog(
-            'Błąd NFC', 'Wystąpił błąd podczas uruchamiania sesji NFC: $e');
+        _showDialog('Błąd NFC', 'Wystąpił błąd podczas uruchamiania sesji NFC: $e');
       },
     );
   }
@@ -69,17 +64,16 @@ class _NfcSendExampleState extends State<NfcSendExample> {
   void _showDialog(String title, String content) {
     showDialog(
       context: context,
-      builder: (context) =>
-          AlertDialog(
-            title: Text(title),
-            content: Text(content),
-            actions: <Widget>[
-              TextButton(
-                child: const Text('OK'),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () => Navigator.of(context).pop(),
           ),
+        ],
+      ),
     );
   }
 
@@ -91,8 +85,8 @@ class _NfcSendExampleState extends State<NfcSendExample> {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width; // Gets the screen width
-    double screenHeight = MediaQuery.of(context).size.height; // Gets the screen height
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       appBar: AppBar(
@@ -101,7 +95,7 @@ class _NfcSendExampleState extends State<NfcSendExample> {
         backgroundColor: Colors.red[900],
       ),
       body: Container(
-        padding: EdgeInsets.all(16), // Adds padding around the outer container
+        padding: EdgeInsets.all(16),
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage("assets/background.png"),
@@ -110,30 +104,32 @@ class _NfcSendExampleState extends State<NfcSendExample> {
           ),
         ),
         child: Center(
-          child: Container(
-            width: screenWidth * 0.8, // Sets the width to 80% of the screen width
-            height: screenHeight * 0.2, // Sets the height to 20% of the screen height
-            padding: EdgeInsets.all(20), // Adds padding inside the container
-            decoration: BoxDecoration(
-              color: Colors.white, // Background color of the rectangle
-              borderRadius: BorderRadius.circular(8), // Rounded corners
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1), // Shadow color
-                  spreadRadius: 5,
-                  blurRadius: 7,
-                  offset: Offset(0, 3), // Shadow position
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Container(
+                width: screenWidth * 0.8,
+                height: screenHeight * 0.2,
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage("assets/3.png"),
+                    fit: BoxFit.cover,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-              ],
-            ),
-            child: const Text(
-              'Jeśli jesteś nowym użytkownikiem przyłóź urządzenie do karty, aby stworzyć swoją MasterCard',
-              textAlign: TextAlign.center, // Centers the text inside the container
-              style: TextStyle(
-                fontSize: 18, // Font size
-                color: Colors.black, // Text color
               ),
-            ),
+              SizedBox(height: 20),
+              const Text(
+                'Jeśli jesteś nowym użytkownikiem przyłóź urządzenie do karty, aby stworzyć swoją MasterCard',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white,
+                ),
+              ),
+            ],
           ),
         ),
       ),

@@ -25,13 +25,13 @@ class LoginScreen extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(
-                  'Jeśli adres e-mail istnieje w naszej bazie danych, wysłaliśmy link do resetowania hasła.')),
+                  'Link do resetu hasla został wysłany na adres mailowy.')),
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(
-                  'Wystąpił błąd przy wysyłaniu linku do resetowania hasła.')),
+                  'Wystąpił błąd podczas wysyłania linka do resetu hasła.')),
         );
       }
     }
@@ -86,6 +86,7 @@ class LoginScreen extends StatelessWidget {
       //  MediaQuery.of(context).size.height - AppBar().preferredSize.height;
 
     return Scaffold(
+
       appBar: AppBar(
         title: const Text('Logowanie'),
         backgroundColor: Colors.red[900],
@@ -118,26 +119,39 @@ class LoginScreen extends StatelessWidget {
                     controller: emailController,
                     decoration: InputDecoration(
                       labelText: 'Email',
+                      labelStyle: TextStyle(color: Colors.grey[800]),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
                       hintText: 'Wpisz swój email',
                       filled: true,
                       fillColor: Colors.white,
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.red), // Kolor obwódki, gdy TextField jest w fokusie
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
+                    cursorColor: Colors.black45,
                   ),
                   SizedBox(height: 10),
                   TextField(
                     controller: passwordController,
                     decoration: InputDecoration(
                       labelText: 'Hasło',
+                      labelStyle: TextStyle(color: Colors.grey[800]),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
                       hintText: 'Wpisz swoje hasło',
                       filled: true,
                       fillColor: Colors.white,
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.red), // Kolor obwódki, gdy TextField jest w fokusie
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+
                     ),
+                    cursorColor: Colors.black45,
                     obscureText: true,
                   ),
 

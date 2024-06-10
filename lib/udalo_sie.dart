@@ -8,7 +8,6 @@ import 'more_options.dart';
 import 'NFC.dart';
 import 'ticket_purchase.dart';
 import 'my_tickets.dart';
-import 'qrcode_view.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -102,94 +101,68 @@ class HelloScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            SizedBox(height: 3* screenHeight / 40),
-            Center(
-              // This centers the button container in its parent
-              child: SizedBox(
-                width: screenWidth / 1.3,
-                // Makes the button's width 1/3 of the screen's width
-                height: screenHeight / 4,
-                child: MaterialButton(
-                  color: Colors.red[900],
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                        20), // zaokrąglone rogi o promieniu 20
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const TicketsPurchaseScreen()),
-                    );
-                  },
-                  child: const Text('Wejścia na skatepark',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          // Increase the font size
-                          fontWeight: FontWeight.bold)),
-                ),
-              ),
+            SizedBox(height: 3 * screenHeight / 40),
+            _buildButton(
+              context,
+              screenWidth,
+              screenHeight,
+              'assets/1.png',
+
+              TicketsPurchaseScreen(),
             ),
             SizedBox(height: screenHeight / 40),
-            Center(
-              // This centers the button container in its parent
-              child: SizedBox(
-                width: screenWidth / 1.3,
-                // Makes the button's width 1/3 of the screen's width
-                height: screenHeight / 4,
-                child: MaterialButton(
-                  color: Colors.red[900],
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                        20), // zaokrąglone rogi o promieniu 20
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const PassPurchaseScreen()),
-                    );
-                  },
-                  child: const Text('Karnety na zajęcia',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          // Increase the font size
-                          fontWeight: FontWeight.bold)),
-                ),
-              ),
+            _buildButton(
+              context,
+              screenWidth,
+              screenHeight,
+              'assets/2.png',
+
+              PassPurchaseScreen(),
             ),
             SizedBox(height: screenHeight / 40),
-            Center(
-              // This centers the button container in its parent
-              child: SizedBox(
-                width: screenWidth / 1.3,
-                // Makes the button's width 1/3 of the screen's width
-                height: screenHeight / 4,
-                child: MaterialButton(
-                  color: Colors.red[900],
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                        20), // zaokrąglone rogi o promieniu 20
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => NfcSendExample()),
-                    );
-                  },
-                  child: const Text('RollMaster Card',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          // Increase the font size
-                          fontWeight: FontWeight.bold)),
-                ),
-              ),
+            _buildButton(
+              context,
+              screenWidth,
+              screenHeight,
+              'assets/4.png',
+
+              NfcSendExample(),
             ),
-            SizedBox(height: 2*screenHeight / 40),
+            SizedBox(height: 2 * screenHeight / 40),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildButton(BuildContext context, double screenWidth,
+      double screenHeight, String imagePath, Widget nextScreen) {
+    return Center(
+      child: SizedBox(
+        width: screenWidth / 1.3,
+        height: screenHeight / 4,
+        child: MaterialButton(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => nextScreen),
+            );
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(imagePath),
+                fit: BoxFit.cover,
+              ),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Center(
+
+            ),
+          ),
         ),
       ),
     );

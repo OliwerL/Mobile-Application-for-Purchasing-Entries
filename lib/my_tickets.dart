@@ -14,7 +14,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height - 40 - 163;
+    double screenHeight = MediaQuery.of(context).size.height - 52 - 40 - 163;
 
     return Scaffold(
       appBar: AppBar(
@@ -37,7 +37,16 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
+                  Text(
+                    "Wejścia na skatepark:",
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Container(
@@ -72,12 +81,37 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
+                  Text(
+                    "Moje karnety:",
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
                   Container(
                     width: screenWidth * 0.7,
                     height: screenHeight * 0.8,
-                    child: Column(
-                      children: List.generate(coinData.purchasedTickets.length, (index) {
+                    child: coinData.purchasedTickets.isEmpty
+                        ? Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          "\n\nTu pojawią się Twoje karnety po kupnie.",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    )
+                        : ListView.builder(
+                      itemCount: coinData.purchasedTickets.length,
+                      itemBuilder: (context, index) {
                         return Container(
                           margin: const EdgeInsets.symmetric(vertical: 8.0),
                           padding: const EdgeInsets.all(8.0),
@@ -114,7 +148,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
                             ),
                           ),
                         );
-                      }),
+                      },
                     ),
                   ),
                 ],

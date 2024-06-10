@@ -136,46 +136,22 @@ void _showDeleteAccountDialog(BuildContext context) {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        backgroundColor: Colors.red[900], // Set the background color to match the app bar
-        title: const Text(
-          'Usuń konto',
-          style: TextStyle(
-            color: Colors.white, // Set the text color to white
-            fontWeight: FontWeight.bold, // Make the text bold
-          ),
-        ),
-        content: const Text(
-          'Czy na pewno chcesz usunąć swoje konto? Tej operacji nie można cofnąć.',
-          style: TextStyle(
-            color: Colors.white, // Set the text color to white
-          ),
-        ),
+        title: Text('Usuń konto'),
+        content: Text('Czy na pewno chcesz usunąć swoje konto? Tej operacji nie można cofnąć.'),
         actions: [
           TextButton(
-            child: const Text(
-              'Anuluj',
-              style: TextStyle(
-                color: Colors.white, // Set the text color to white
-                fontWeight: FontWeight.bold, // Make the text bold
-              ),
-            ),
+            child: Text('Anuluj'),
             onPressed: () {
               Navigator.of(context).pop();
             },
           ),
           TextButton(
-            child: const Text(
-              'Usuń',
-              style: TextStyle(
-                color: Colors.red, // Set the text color to red
-                fontWeight: FontWeight.bold, // Make the text bold
-              ),
-            ),
+            child: Text('Usuń', style: TextStyle(color: Colors.red)),
             onPressed: () async {
               Navigator.of(context).pop();
               await deleteUserAccount(context);
               Navigator.of(context).pushReplacement(MaterialPageRoute(
-                builder: (context) => const LoginScreen(),
+                builder: (context) => LoginScreen(),
               ));
             },
           ),
@@ -184,7 +160,6 @@ void _showDeleteAccountDialog(BuildContext context) {
     },
   );
 }
-
 
 Future<void> deleteUserAccount(BuildContext context) async {
   final Logger log = Logger();
@@ -262,46 +237,21 @@ Future<String?> _showPasswordInputDialog(BuildContext context) async {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        backgroundColor: Colors.red[900], // Set the background color to match the app bar
-        title: const Text(
-          'Wymagane jest ponowne podanie hasła',
-          style: TextStyle(
-            color: Colors.white, // Set the text color to white
-            fontWeight: FontWeight.bold, // Make the text bold
-          ),
-        ),
+        title: Text('Wymagane jest ponowne podanie hasła'),
         content: TextField(
           controller: passwordController,
           obscureText: true,
-          decoration: const InputDecoration(
-            hintText: 'Password',
-            hintStyle: TextStyle(color: Colors.white70), // Set hint text color to a lighter shade of white
-          ),
-          style: const TextStyle(
-            color: Colors.white, // Set the text color to white
-          ),
+          decoration: InputDecoration(hintText: 'Hasło'),
         ),
         actions: <Widget>[
           TextButton(
-            child: const Text(
-              'Cancel',
-              style: TextStyle(
-                color: Colors.white, // Set the text color to white
-                fontWeight: FontWeight.bold, // Make the text bold
-              ),
-            ),
+            child: Text('Cofnij'),
             onPressed: () {
               Navigator.of(context).pop();
             },
           ),
           TextButton(
-            child: const Text(
-              'Submit',
-              style: TextStyle(
-                color: Colors.white, // Set the text color to white
-                fontWeight: FontWeight.bold, // Make the text bold
-              ),
-            ),
+            child: Text('Potwierdź'),
             onPressed: () {
               Navigator.of(context).pop(passwordController.text);
             },

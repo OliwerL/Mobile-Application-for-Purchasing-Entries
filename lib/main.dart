@@ -41,7 +41,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
+        textSelectionTheme: TextSelectionThemeData(
+          cursorColor: Colors.black45,
+          selectionColor: Colors.transparent, // Zmiana koloru podświetlenia na przezroczysty
+          selectionHandleColor: Colors.grey,
+        ),
         useMaterial3: true,
       ),
       home: StreamBuilder<User?>(

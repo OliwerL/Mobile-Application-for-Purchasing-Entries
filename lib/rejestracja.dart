@@ -30,7 +30,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Rejestracja'),
-        backgroundColor: Colors.grey[350],  // Adjusted to match the MainScreen style
+        backgroundColor: Colors.red[900],
+        foregroundColor: Colors.white, // Adjusted to match the MainScreen style
       ),
       body: Container(
         width: double.infinity,
